@@ -1,6 +1,6 @@
 {
 	"name": "liv",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "A Discord bot built for the Lively server.",
 	"main": "index.js",
 	"scripts": {
@@ -13,5 +13,25 @@
 		"discord.js": "^12.2.0",
 		"discord.js-commando": "github:discordjs/Commando",
 		"quick.db": "^7.1.1"
-	}
+	},
+	"devDependencies": {},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/rjt-rockx/liv.git"
+	},
+	"keywords": [
+		"nodejs",
+		"discord.js",
+		"discord",
+		"commando",
+		"js",
+		"javascript",
+		"discord-bot",
+		"bot",
+		"sqlite"
+	],
+	"bugs": {
+		"url": "https://github.com/rjt-rockx/liv/issues"
+	},
+	"homepage": "https://github.com/rjt-rockx/liv#readme"
 }
