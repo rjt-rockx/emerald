@@ -102,3 +102,13 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Test files
+/test*.*
+
+# Configuration
+/config.js
+
+# Database
+/*.db
+/*.sqlite
