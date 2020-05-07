@@ -30,7 +30,7 @@ module.exports = class Help extends BaseCommand {
 				const commandData = this.getCommandData(command, prefix);
 				return { name: commandData.name, value: commandData.description };
 			});
-			new Paginator(ctx.channel, ctx.author, commands, 15, {
+			new Paginator(ctx, commands, {
 				embedTemplate: { title: "List of commands:" }
 			});
 			return;

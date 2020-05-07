@@ -4,11 +4,11 @@ const { Util: { splitMessage } } = require("discord.js");
 const chunk = (arrayLike, size) => arrayLike.length === 0 ? [] : [arrayLike.slice(0, size)].concat(chunk(arrayLike.slice(size), size));
 
 module.exports = class Paginator {
-	constructor(ctx, fields, timeout, options) {
+	constructor(ctx, fields, options) {
 		this.back = "◀";
 		this.next = "▶";
 		this.stop = "⏹";
-		this.timeout = timeout;
+		this.timeout = options.timeout && Number.isSafeInteger(options.timeout) && options.timeout <= 300 && options.timeout > 0 ? options.timeout : 15;
 		this.member = ctx.member;
 		if (!options) options = {};
 		if (options.numberFields)
