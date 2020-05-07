@@ -2,12 +2,12 @@ const BaseCommand = require("../../src/base/baseCommand.js");
 const Paginator = require("../../src/paginator.js");
 const toTitleCase = str => str.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1));
 
-module.exports = class ListCmdPerms extends BaseCommand {
+module.exports = class ListPerms extends BaseCommand {
 	constructor(client) {
 		super(client, {
-			name: "listcmdperms",
+			name: "listperms",
 			group: "permissions",
-			aliases: ["listcommandpermissions", "listcmdpermissions", "listcommandperms"],
+			aliases: ["listcmdperms", "listcommandpermissions", "listcmdpermissions", "listcommandperms"],
 			description: "List permissions set for a specific command.",
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
 			guarded: true,
@@ -21,20 +21,6 @@ module.exports = class ListCmdPerms extends BaseCommand {
 		});
 	}
 
-	getReadablePermission(ctx, permission) {
-		const enabledText = permission.enabled ? "` enabled`" : "`disabled`";
-		const reasons = {
-			"global": () => `${enabledText} **globally**`,
-			"guild": id => ctx.guild ? ctx.guild.id === id && `${enabledText} for **this server**` : `${enabledText} for the **${ctx.client.guilds.cache.get(id).name}** server`,
-			"category-channel": id => `${enabledText} for the **${ctx.guild.channels.cache.get(id).name}** category`,
-			"text-channel": id => `${enabledText} for the **#${ctx.guild.channels.cache.get(id).name}** channel`,
-			"voice-channel": id => `${enabledText} for the **${ctx.guild.channels.cache.get(id).name}** voice channel`,
-			"role": id => `${enabledText} for the **${ctx.guild.roles.cache.get(id).name}** role`,
-			"user": id => `${enabledText} for **${ctx.client.users.cache.get(id).tag}**`
-		};
-		return reasons[permission.type](permission.id);
-	}
-
 	async task(ctx) {
 		const readablePermFields = [];
 		for (const type of ["global", "guild"]) {
@@ -46,6 +32,6 @@ module.exports = class ListCmdPerms extends BaseCommand {
 				.join("\n");
 			readablePermFields.push({ name: `${toTitleCase(type)} permissions`, value: readableCurrentPerms || "No permissions set." });
 		}
-		return new Paginator(ctx, readablePermFields, 30, { splitLongFields: true, embedTemplate: { title: `Command permissions for ${ctx.args.command.name}` } });
+		return new Paginator(ctx, readablePermFields, { splitLongFields: true, embedTemplate: { title: `Command permissions for ${ctx.args.command.name}` } });
 	}
 };
