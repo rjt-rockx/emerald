@@ -48,6 +48,20 @@ module.exports = class BaseCommand extends Command {
 		return false;
 	}
 
+	getReadablePermission(ctx, permission) {
+		const enabledText = permission.enabled ? "`Enabled `" : "`Disabled`";
+		const reasons = {
+			"global": () => `${enabledText} **globally**`,
+			"guild": id => ctx.guild ? ctx.guild.id === id && `${enabledText} in **this server**` : `${enabledText} in the **${ctx.client.guilds.cache.get(id).name}** server`,
+			"category-channel": id => `${enabledText} in the **${ctx.guild.channels.cache.get(id).name}** category`,
+			"text-channel": id => `${enabledText} in the **#${ctx.guild.channels.cache.get(id).name}** channel`,
+			"voice-channel": id => `${enabledText} in the **${ctx.guild.channels.cache.get(id).name}** voice channel`,
+			"role": id => `${enabledText} for the **${ctx.guild.roles.cache.get(id).name}** role`,
+			"user": id => `${enabledText} for **${ctx.client.users.cache.get(id).tag}**`
+		};
+		return reasons[permission.type](permission.id);
+	}
+
 	beforeExecute(ctx) {
 		// default method that can be called before the command actually executes, can be overriden by the extended command
 	}
