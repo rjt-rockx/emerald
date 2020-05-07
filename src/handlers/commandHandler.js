@@ -17,6 +17,7 @@ class CommandHandler {
 
 	registerTypes() {
 		this.client.registry.registerDefaultTypes();
+		this.client.registry.registerTypesIn(resolve(__dirname, "../types/"));
 	}
 
 	checkIfValid(command) {
