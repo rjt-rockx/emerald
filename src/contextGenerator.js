@@ -102,10 +102,15 @@ class ContextGenerator {
 
 	attachExtras(context) {
 		if (context.message) {
-			context.react = (...data) => context.message.react(...data);
 			context.msg = context.message;
-			context.send = (...data) => context.message.channel.send(...data);
-			context.embed = data => data instanceof MessageEmbed ? context.send(data) : context.send(new MessageEmbed(data));
+			context.react = (...data) => context.message.react(...data);
+			context.code = (...data) => context.message.code(...data);
+			context.send = (...data) => context.message.say(...data);
+			context.say = (...data) => context.message.say(...data);
+			context.edit = (...data) => context.message.edit(...data);
+			context.reply = (...data) => context.message.reply(...data);
+			context.replyEmbed = (...data) => context.message.replyEmbed(...data);
+			context.embed = (...data) => context.message.embed(...data);
 			if (context.message.command)
 				context.command = context.message.command;
 		}
