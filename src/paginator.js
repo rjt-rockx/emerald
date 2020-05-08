@@ -30,6 +30,7 @@ module.exports = class Paginator {
 			footer: this.footer
 		})).then(async msg => {
 			this.message = msg;
+			if (this.message.partial) await this.message.fetch().catch(() => { });
 			if (this.total < 2) return;
 			await this.message.react(this.back);
 			await this.message.react(this.next);
@@ -37,7 +38,7 @@ module.exports = class Paginator {
 			this.collector = this.message.createReactionCollector((reaction, user) => reaction.me && user.id === this.member.id && user.id !== this.message.author.id, { time: this.timeout * 1000 });
 
 			const paginate = async reaction => {
-				if (reaction.partial) await reaction.fetch();
+				if (reaction.partial) await reaction.fetch().catch(() => { });
 				switch (reaction.emoji.toString()) {
 					case this.back: {
 						this.current--;

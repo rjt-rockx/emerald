@@ -10,7 +10,8 @@ const client = new CommandoClient({
 	owner: config.owners,
 	commandPrefix: config.defaultPrefix,
 	nonCommandEditable: false,
-	commandEditableDuration: 0
+	commandEditableDuration: 0,
+	partials: ["CHANNEL", "MESSAGE", "REACTION"]
 });
 
 client.once("ready", async () => {

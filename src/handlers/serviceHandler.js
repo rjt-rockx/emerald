@@ -125,7 +125,7 @@ class ServiceHandler {
 	async runClientEvent(event, args) {
 		for (const service of this.services)
 			if (typeof service[onText(event)] === "function" && service.enabled) {
-				const context = this.client.context[event](...args);
+				const context = await this.client.context[event](...args);
 				if (typeof context !== "undefined")
 					service[onText(event)](context);
 			}
@@ -134,7 +134,7 @@ class ServiceHandler {
 	async runTimedEvent(event, args) {
 		for (const service of this.services) {
 			if (typeof service[everyText(event)] === "function" && service.enabled) {
-				const context = this.client.context.timedEvent(...args);
+				const context = await this.client.context.timedEvent(...args);
 				if (typeof context !== "undefined")
 					service[everyText(event)](context);
 			}
