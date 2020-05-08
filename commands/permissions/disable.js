@@ -9,6 +9,7 @@ module.exports = class Disable extends BaseCommand {
 			aliases: ["disablecmd", "disablecommand"],
 			description: "Disable a bot command.",
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+			userPermissions: ["ADMINISTRATOR"],
 			guarded: true,
 			args: [
 				{

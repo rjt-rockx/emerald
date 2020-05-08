@@ -9,6 +9,7 @@ module.exports = class Enable extends BaseCommand {
 			aliases: ["enablecmd", "enablecommand"],
 			description: "Enable a bot command.",
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+			userPermissions: ["ADMINISTRATOR"],
 			guarded: true,
 			args: [
 				{

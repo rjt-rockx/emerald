@@ -10,6 +10,7 @@ module.exports = class ListPerms extends BaseCommand {
 			aliases: ["listcmdperms", "listcommandpermissions", "listcmdpermissions", "listcommandperms"],
 			description: "List permissions set for a specific command.",
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+			userPermissions: ["ADMINISTRATOR"],
 			guarded: true,
 			args: [
 				{
