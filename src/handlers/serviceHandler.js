@@ -89,7 +89,18 @@ class ServiceHandler {
 	}
 
 	listServices() {
-		return this.services.map(service => { return { id: service.id, enabled: service.enabled }; });
+		return this.services.map(({ id, name, description, enabled }) => ({ id, name, description, enabled }));
+	}
+
+	getService(id) {
+		return this.services.find(service => service.id === id);
+	}
+
+	getServiceEvents(id) {
+		const service = this.getService(id);
+		if (!service) return;
+		const serviceListeners = [...userFunctions(service)];
+		return this.events.filter(event => serviceListeners.includes(onText(event)) || serviceListeners.includes(everyText(event)));
 	}
 
 	enableService(id) {
@@ -102,16 +113,6 @@ class ServiceHandler {
 		for (const service of this.services)
 			if (service.id === id && service.enabled)
 				service.disable();
-	}
-
-	getServiceInfo(id) {
-		for (const service of this.services)
-			if (service.id === id)
-				return {
-					name: service.name,
-					description: service.description,
-					enabled: service.enabled
-				};
 	}
 
 	removeService(service) {
