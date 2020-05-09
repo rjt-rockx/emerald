@@ -19,7 +19,7 @@ class ContextGenerator {
 		return this;
 	}
 
-	partialErrorHandler() {}
+	partialErrorHandler() { }
 
 	get defaultContext() {
 		return { client: this.client, emittedAt: new Date(), globalStorage: dataHandler.getGlobalStorage(), logger };
@@ -119,7 +119,8 @@ class ContextGenerator {
 			context.dmEmbed = data => data instanceof MessageEmbed ? context.dm(data) : context.dm(new MessageEmbed(data));
 		}
 		if (context.channel) {
-			context.selfDestruct = (data, seconds = 10) => context.channel.send(data).then(msg => msg.delete(seconds * 1000));
+			context.selfDestruct = (data, seconds = 10) => context.channel.send(data).then(msg => msg.delete({timeout: seconds * 1000}));
+			context.selfDestructEmbed = (data, seconds = 10) => context.channel.send(new MessageEmbed(data)).then(msg => msg.delete({timeout: seconds * 1000}));
 		}
 		context.prefix = context.guild && context.guild.commandPrefix ? context.guild.commandPrefix : context.client.commandPrefix;
 	}
