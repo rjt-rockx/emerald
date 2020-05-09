@@ -10,6 +10,8 @@ const getDirectories = source => readdirSync(source).map(name => join(source, na
 class CommandHandler {
 	async initialize(client) {
 		this.client = client;
+		if (!this.client.commandHandler)
+			this.client.commandHandler = this;
 		this.registerTypes();
 		this.addCommandsIn("../../commands");
 		return [...this.client.registry.commands.values()]; // we convert the discord.js collection into an array for consistency with the service handler

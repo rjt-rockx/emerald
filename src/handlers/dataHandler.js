@@ -6,7 +6,8 @@ class DataHandler {
 		this.globalStorage = new QuickDB.table("global");
 		this.guildStorages = [];
 		this.client = client;
-		this.client.dataHandler = this;
+		if (!this.client.dataHandler)
+			this.client.dataHandler = this;
 		this.setupGuilds();
 		return this.guildStorages;
 	}

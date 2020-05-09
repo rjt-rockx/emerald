@@ -64,6 +64,8 @@ class ServiceHandler {
 		this.addServicesIn("../../services");
 		this.registerClientEvents();
 		this.registerTimedEvents();
+		if (!this.client.serviceHandler)
+			this.client.serviceHandler = this;
 		this.client.services = this.services;
 		return this.services;
 	}
