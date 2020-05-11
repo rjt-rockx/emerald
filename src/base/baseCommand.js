@@ -94,7 +94,7 @@ module.exports = class BaseCommand extends Command {
 			commandPermissions = this.checkGuildCommandPermissions(context);
 		if (commandPermissions.permitted) {
 			await this.beforeExecute(context);
-			await this.task(context).catch(context.logger.error);
+			await Promise.resolve(this.task(context)).catch(context.logger.error);
 			await this.afterExecute(context);
 		}
 		if (!commandPermissions.permitted) {
