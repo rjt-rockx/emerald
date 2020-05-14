@@ -1,4 +1,4 @@
-const { readdirSync } = require("fs"), { join, resolve } = require("path").win32;
+const { readdirSync } = require("fs"), { join, resolve } = require("path");
 const onText = str => str.replace(/\w\S*/g, txt => "on" + txt.charAt(0).toUpperCase() + txt.substr(1));
 const everyText = str => str.replace(/\w\S*/g, txt => "every" + txt.charAt(0).toUpperCase() + txt.substr(1));
 const deepProps = x => x && x !== Object.prototype && Object.getOwnPropertyNames(x).concat(deepProps(Object.getPrototypeOf(x)) || []);

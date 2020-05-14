@@ -2,7 +2,7 @@ const BaseCommand = require("../base/baseCommand.js");
 
 // this is code from my older bot, useful stuff
 const { lstatSync, readdirSync } = require("fs");
-const { resolve, join, parse } = require("path").win32;
+const { resolve, join, parse } = require("path");
 
 const isDirectory = source => lstatSync(source).isDirectory() && !source.startsWith(".");
 const getDirectories = source => readdirSync(source).map(name => join(source, name)).filter(isDirectory).map(directory => parse(directory).name);
