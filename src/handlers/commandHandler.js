@@ -2,7 +2,7 @@ const BaseCommand = require("../base/baseCommand.js");
 
 // this is code from my older bot, useful stuff
 const { lstatSync, readdirSync } = require("fs");
-const { resolve, join, parse } = require("path");
+const { resolve, join, parse, sep } = require("path");
 
 const isDirectory = source => lstatSync(source).isDirectory() && !source.startsWith(".");
 const getDirectories = source => readdirSync(source).map(name => join(source, name)).filter(isDirectory).map(directory => parse(directory).name);
@@ -30,7 +30,7 @@ class CommandHandler {
 		if (pathToCommand.endsWith(".js") && !pathToCommand.endsWith("index.js")) { // index.js is usually used as an index of all other js files in that dir
 			const command = require(pathToCommand);
 			if (this.checkIfValid(command)) {
-				const groupID = resolve(pathToCommand).substring(0, pathToCommand.indexOf(".")).split("\\").reverse()[1]; // we won't actually need the filename tbh
+				const groupID = resolve(pathToCommand).substring(0, pathToCommand.indexOf(".")).split(sep).reverse()[1]; // we won't actually need the filename tbh
 				if (!this.client.registry.groups.has(groupID))
 					this.client.registry.registerGroup(groupID);
 				this.client.registry.registerCommand(command);
