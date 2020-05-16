@@ -10,6 +10,15 @@ module.exports = class ReactionLog extends BaseService {
 		});
 	}
 
+	resolveURL(emoji, dynamic = false) {
+		if (emoji.id) {
+			if (emoji.animated && dynamic)
+				return `https://cdn.discordapp.com/emojis/${emoji.id}.gif`;
+			return `https://cdn.discordapp.com/emojis/${emoji.id}.png`;
+		}
+		return `https://raw.githack.com/twitter/twemoji/v12.1.6/assets/72x72/${emoji.name.codePointAt(0).toString(16)}.png`;
+	}
+
 	async onMessageReactionAdd(ctx) {
 		if (!ctx || ctx.user.bot || !ctx.user || !ctx.reaction || ctx.reaction.message.author.bot) return;
 
@@ -21,7 +30,7 @@ module.exports = class ReactionLog extends BaseService {
 		if (errorReported) return;
 
 		const logChannel = ctx.guildStorage.get("reactionLogChannel");
-		const url = getUrl(ctx.reaction.emoji);
+		const url = this.resolveURL(ctx.reaction.emoji);
 		if (this.client.channels.cache.has(logChannel)) {
 			this.client.channels.cache.get(logChannel).send(new MessageEmbed({
 				author: {
@@ -72,7 +81,7 @@ module.exports = class ReactionLog extends BaseService {
 		if (errorReported) return;
 
 		const logChannel = ctx.guildStorage.get("reactionLogChannel");
-		const url = getUrl(ctx.reaction.emoji);
+		const url = this.resolveURL(ctx.reaction.emoji);
 		if (this.client.channels.cache.has(logChannel)) {
 			this.client.channels.cache.get(logChannel).send(new MessageEmbed({
 				author: {
@@ -121,7 +130,7 @@ module.exports = class ReactionLog extends BaseService {
 		if (errorReported) return;
 
 		const logChannel = ctx.guildStorage.get("reactionLogChannel");
-		const url = getUrl(ctx.reaction.emoji);
+		const url = this.resolveURL(ctx.reaction.emoji);
 		if (this.client.channels.cache.has(logChannel)) {
 			this.client.channels.cache.get(logChannel).send(new MessageEmbed({
 				author: {
@@ -152,13 +161,4 @@ module.exports = class ReactionLog extends BaseService {
 			}));
 		}
 	}
-};
-
-const getUrl = emoji => {
-	if (emoji.id) {
-		if (emoji.animated)
-			return `https://cdn.discordapp.com/emojis/${emoji.id}.gif`;
-		return `https://cdn.discordapp.com/emojis/${emoji.id}.png`;
-	}
-	return `https://raw.githack.com/twitter/twemoji/v12.1.6/assets/72x72/${emoji.name.codePointAt(0).toString(16)}.png`;
 };

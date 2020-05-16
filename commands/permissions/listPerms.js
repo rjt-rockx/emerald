@@ -1,6 +1,6 @@
 const BaseCommand = require("../../src/base/baseCommand.js");
 const Paginator = require("../../src/paginator.js");
-const toTitleCase = str => str.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1));
+const { toTitleCase } = require("../../src/utilities.js");
 
 module.exports = class ListPerms extends BaseCommand {
 	constructor(client) {
