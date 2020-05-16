@@ -1,2 +1,2 @@
-# liv
- A Discord bot built for the Lively server.
+# emerald
+ A simple Discord bot built with Discord.js and Commando.
