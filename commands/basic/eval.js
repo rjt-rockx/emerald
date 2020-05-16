@@ -1,6 +1,5 @@
-const { inspect } = require("util"), { splitMessage } = require("discord.js");
-const escapeRegex = text => text.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&").replace(/-/g, "\\x2d");
-const nlPattern = new RegExp("!!NL!!", "g");
+const { inspect } = require("util"), Discord = require("discord.js"), Commando = require("discord.js-commando");
+const { escapeRegex, userFunctions, newlinePattern } = require("../../src/utilities.js");
 const BaseCommand = require("../../src/base/baseCommand.js");
 
 module.exports = class Eval extends BaseCommand {
@@ -18,6 +17,7 @@ module.exports = class Eval extends BaseCommand {
 				}
 			]
 		});
+		this.silent = false;
 		this.lastResult = null;
 		this.timeoutFlag = true;
 		this.newTimeout = (seconds = 60) => this.timeoutFlag = true && setTimeout(async () => {
@@ -30,6 +30,7 @@ module.exports = class Eval extends BaseCommand {
 	}
 
 	async task(ctx) {
+		this.silent = false;
 		this.currentContext = ctx;
 		if (ctx.msg.content.includes("token") || ctx.msg.content.includes("config"))
 			return ctx.embed({ description: "Accessing token/config is not allowed." });
@@ -46,13 +47,13 @@ module.exports = class Eval extends BaseCommand {
 		if (this.existingTimeout)
 			clearTimeout(this.existingTimeout);
 		this.lastEval = ctx.message;
-		const lastResult = this.lastResult, lastresult = this.lastResult;
+		const lastResult = this.lastResult, lastresult = this.lastResult, listFunctions = userFunctions, listfunctions = userFunctions;
 		try {
 			this.lastResult = eval(ctx.args.script);
 		} catch (err) {
-			if (this.reactionsEnabled) ctx.message.react("❌").catch(() => { });
+			if (this.reactionsEnabled && !this.silent) ctx.message.react("❌").catch(() => { });
 			this.existingTimeout = this.newTimeout();
-			const result = splitMessage([
+			const result = Discord.splitMessage([
 				"```",
 				err.stack || err,
 				"```"
@@ -61,16 +62,31 @@ module.exports = class Eval extends BaseCommand {
 		}
 
 		const result = this.makeResultMessages(this.lastResult, ctx.args.script, ctx);
-		if (this.reactionsEnabled) ctx.message.react("✅").catch(() => { });
+		if (this.reactionsEnabled && !this.silent) ctx.message.react("✅").catch(() => { });
 		this.existingTimeout = this.newTimeout();
-		return this.sendResult(ctx, result);
+		return this.sendResult(ctx, result).finally(async () => {
+			if (this.lastResult instanceof Promise) {
+				this.lastResult.then(resolvedValue => {
+					const updatedResult = this.makeResultMessages(resolvedValue, ctx.args.script, ctx);
+					this.sendResult(ctx, updatedResult);
+				}).catch(err => {
+					const updatedResult = Discord.splitMessage([
+						"```",
+						"Error while evaluating",
+						err.stack || err,
+						"```"
+					].join("\n"), { maxLength: 1900, prepend: "```\n", append: "\n```" });
+					this.sendResult(ctx, updatedResult);
+				});
+			}
+		});
 	}
 
 	sendReply(val) {
 		if (val instanceof Error) {
-			if (this.reactionsEnabled) this.currentContext.message.react("❌").catch(() => { });
+			if (this.reactionsEnabled && !this.silent) this.currentContext.message.react("❌").catch(() => { });
 			this.existingTimeout = this.newTimeout();
-			const result = splitMessage([
+			const result = Discord.splitMessage([
 				"```",
 				"Error while evaluating",
 				val.stack || val,
@@ -78,17 +94,31 @@ module.exports = class Eval extends BaseCommand {
 			].join("\n"), { maxLength: 1900, prepend: "```\n", append: "\n```" });
 			return this.sendResult(this.currentContext, result);
 		} else {
-			if (this.reactionsEnabled) this.currentContext.message.react("✅").catch(() => { });
+			if (this.reactionsEnabled && !this.silent) this.currentContext.message.react("✅").catch(() => { });
 			const result = this.makeResultMessages(val, null, this.currentContext);
 			this.lastResult = val;
 			this.existingTimeout = this.newTimeout();
-			return this.sendResult(this.currentContext, result);
+			return this.sendResult(this.currentContext, result).finally(async () => {
+				if (this.lastResult instanceof Promise)
+					this.lastResult.then(resolvedValue => {
+						const updatedResult = this.makeResultMessages(resolvedValue, null, this.currentContext);
+						this.sendResult(this.currentContext, updatedResult);
+					}).catch(err => {
+						const updatedResult = Discord.splitMessage([
+							"```",
+							"Error while evaluating",
+							err.stack || err,
+							"```"
+						].join("\n"), { maxLength: 1900, prepend: "```\n", append: "\n```" });
+						this.sendResult(this.currentContext, updatedResult);
+					});
+			});
 		}
 	}
 
 	makeResultMessages(result, input = null, ctx = this.currentContext) {
 		let inspected = inspect(result, { depth: 0 })
-			.replace(nlPattern, "\n");
+			.replace(newlinePattern, "\n");
 		for (const pattern of this.getSensitivePatterns(ctx)) inspected = inspected.replace(pattern, "[CENSORED]");
 		const split = inspected.split("\n");
 		const lastInspected = inspected[inspected.length - 1];
@@ -97,13 +127,13 @@ module.exports = class Eval extends BaseCommand {
 		const prepend = `\`\`\`js\n${prependPart}\n`;
 		const append = `\n${appendPart}\n\`\`\``;
 		if (input) {
-			return splitMessage([
+			return Discord.splitMessage([
 				"```js",
 				inspected,
 				"```"
 			].join("\n"), { maxLength: 1900, prepend, append });
 		} else {
-			return splitMessage([
+			return Discord.splitMessage([
 				"```js",
 				inspected,
 				"```"
@@ -112,6 +142,10 @@ module.exports = class Eval extends BaseCommand {
 	}
 
 	async sendResult(ctx = this.currentContext, result) {
+		if (this.silent) {
+			ctx.message.delete().catch(() => { });
+			return;
+		}
 		if (result.length < 2) {
 			if (this.reusableMessage)
 				return this.reusableMessage.edit(result[0]);
