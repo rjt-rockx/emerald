@@ -1,6 +1,6 @@
 const { MessageAttachment, MessageEmbed } = require("discord.js");
 const BaseService = require("../src/base/baseService.js");
-const { properRoundToTwo } = require("../src/utilites.js");
+const { properRoundToTwo } = require("../src/utilities.js");
 
 module.exports = class AttachmentLog extends BaseService {
 	constructor(client) {
