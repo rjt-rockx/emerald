@@ -1,5 +1,6 @@
 const { MessageEmbed } = require("discord.js");
 const logger = require("./logger.js");
+const paginator = require("./paginator.js");
 const dataHandler = require("./handlers/dataHandler.js");
 
 const camelCase = data => data.replace(/(_\w)/g, text => text[1].toUpperCase());
@@ -22,7 +23,11 @@ class ContextGenerator {
 	partialErrorHandler() { }
 
 	get defaultContext() {
-		return { client: this.client, emittedAt: new Date(), globalStorage: dataHandler.getGlobalStorage(), logger };
+		const context = {
+			client: this.client, emittedAt: new Date(), globalStorage: dataHandler.getGlobalStorage(), logger, paginator
+		};
+		context.paginate = (...data) => new context.paginator(context, ...data);
+		return context;
 	}
 
 	async fetchPartials(context) {
@@ -96,8 +101,10 @@ class ContextGenerator {
 			if (context.invite)
 				context.guild = context.invite.guild;
 		}
-		if (context.guild)
+		if (context.guild) {
 			context.guildStorage = dataHandler.getGuildStorage(context.guild.id);
+			context.botMember = context.guild.members.resolve(context.client.user.id);
+		}
 	}
 
 	attachExtras(context) {
@@ -119,8 +126,8 @@ class ContextGenerator {
 			context.dmEmbed = data => data instanceof MessageEmbed ? context.dm(data) : context.dm(new MessageEmbed(data));
 		}
 		if (context.channel) {
-			context.selfDestruct = (data, seconds = 10) => context.channel.send(data).then(msg => msg.delete({timeout: seconds * 1000}));
-			context.selfDestructEmbed = (data, seconds = 10) => context.channel.send(new MessageEmbed(data)).then(msg => msg.delete({timeout: seconds * 1000}));
+			context.selfDestruct = (data, seconds = 10) => context.channel.send(data).then(msg => msg.delete({ timeout: seconds * 1000 }));
+			context.selfDestructEmbed = (data, seconds = 10) => context.channel.send(new MessageEmbed(data)).then(msg => msg.delete({ timeout: seconds * 1000 }));
 		}
 		context.prefix = context.guild && context.guild.commandPrefix ? context.guild.commandPrefix : context.client.commandPrefix;
 	}
