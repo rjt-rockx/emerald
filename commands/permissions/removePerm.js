@@ -1,5 +1,4 @@
 const BaseCommand = require("../../src/base/baseCommand.js");
-const Paginator = require("../../src/paginator.js");
 
 module.exports = class RemovePerm extends BaseCommand {
 	constructor(client) {
@@ -42,7 +41,7 @@ module.exports = class RemovePerm extends BaseCommand {
 					permEntry.permissions = [];
 				return permEntry;
 			}));
-			return new Paginator(ctx,
+			return ctx.paginate(
 				[{ name: "Removed permissions", value: removedPerms }],
 				{
 					splitLongFields: true,

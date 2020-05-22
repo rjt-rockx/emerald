@@ -1,5 +1,4 @@
 const BaseCommand = require("../../src/base/baseCommand.js");
-const Paginator = require("../../src/paginator.js");
 
 module.exports = class ListNotes extends BaseCommand {
 	constructor(client) {
@@ -43,7 +42,7 @@ module.exports = class ListNotes extends BaseCommand {
 				value: noteEntry.note,
 				inline: false
 			}));
-			return new Paginator(ctx, noteFields, {
+			return ctx.paginate(noteFields, {
 				embedTemplate: {
 					title: `Notes on ${ctx.args.user.tag}`,
 					thumbnail: { url: ctx.args.user.displayAvatarURL({ format: "png", dynamic: true, size: 1024 }) }

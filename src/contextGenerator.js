@@ -1,6 +1,6 @@
 const { MessageEmbed } = require("discord.js");
-const logger = require("./logger.js");
-const paginator = require("./paginator.js");
+const logger = require("./utilities/logger.js");
+const paginator = require("./utilities/paginator.js");
 const dataHandler = require("./handlers/dataHandler.js");
 
 const camelCase = data => data.replace(/(_\w)/g, text => text[1].toUpperCase());
@@ -17,16 +17,20 @@ class ContextGenerator {
 	async initialize(client) {
 		this.client = client;
 		this.client.context = this;
+		this.defaultCtx = {
+			client: this.client,
+			globalStorage: dataHandler.getGlobalStorage(),
+			logger, paginator
+		};
 		return this;
 	}
 
 	partialErrorHandler() { }
 
 	get defaultContext() {
-		const context = {
-			client: this.client, emittedAt: new Date(), globalStorage: dataHandler.getGlobalStorage(), logger, paginator
-		};
+		const context = { ...this.defaultCtx };
 		context.paginate = (...data) => new context.paginator(context, ...data);
+		context.emittedAt = new Date();
 		return context;
 	}
 

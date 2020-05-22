@@ -1,6 +1,5 @@
 const BaseCommand = require("../../src/base/baseCommand.js");
-const Paginator = require("../../src/paginator.js");
-const { toTitleCase } = require("../../src/utilities.js");
+const { toTitleCase } = require("../../src/utilities/utilities.js");
 
 module.exports = class ListPerms extends BaseCommand {
 	constructor(client) {
@@ -33,6 +32,6 @@ module.exports = class ListPerms extends BaseCommand {
 				.join("\n");
 			readablePermFields.push({ name: `${toTitleCase(type)} permissions`, value: readableCurrentPerms || "No permissions set." });
 		}
-		return new Paginator(ctx, readablePermFields, { splitLongFields: true, embedTemplate: { title: `Command permissions for ${ctx.args.command.name}` } });
+		return ctx.paginate(readablePermFields, { splitLongFields: true, embedTemplate: { title: `Command permissions for ${ctx.args.command.name}` } });
 	}
 };

@@ -1,7 +1,6 @@
 const BaseCommand = require("../../src/base/baseCommand.js");
-const Paginator = require("../../src/paginator.js");
 const { Util: { escapeMarkdown } } = require("discord.js");
-const { toTitleCase } = require("../../src/utilities.js");
+const { toTitleCase } = require("../../src/utilities/utilities.js");
 
 module.exports = class Help extends BaseCommand {
 	constructor(client) {
@@ -30,10 +29,9 @@ module.exports = class Help extends BaseCommand {
 				const commandData = this.getCommandData(command, prefix);
 				return { name: commandData.name, value: commandData.description };
 			});
-			new Paginator(ctx, commands, {
+			return ctx.paginate(commands, {
 				embedTemplate: { title: "List of commands:" }
 			});
-			return;
 		}
 		const commandData = this.getCommandData(ctx.args.command, prefix);
 		const fields = [];
