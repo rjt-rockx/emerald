@@ -9,9 +9,11 @@
 	"author": "rjt",
 	"license": "MIT",
 	"dependencies": {
+		"@google-cloud/storage": "^5.0.1",
 		"chalk": "^4.0.0",
 		"discord.js": "^12.2.0",
 		"discord.js-commando": "github:discordjs/Commando",
+		"got": "^11.1.4",
 		"quick.db": "^7.1.1"
 	},
 	"devDependencies": {},
