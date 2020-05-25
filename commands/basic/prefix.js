@@ -13,7 +13,8 @@ module.exports = class Prefix extends BaseCommand {
 					key: "prefix",
 					prompt: "New prefix to set, if any.",
 					type: "string",
-					default: ""
+					default: "",
+					validate: v => String(v).length <= 16
 				}
 			]
 		});
