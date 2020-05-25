@@ -70,8 +70,8 @@ class ContextGenerator {
 			if (context.newMember)
 				context.member = context.newMember;
 			if (context.guild && context.user && !context.member)
-				if (context.guild.members.resolve(context.user.id))
-					context.member = context.guild.members.resolve(context.user.id);
+				if (context.guild.members.cache.has(context.user.id))
+					context.member = context.guild.members.cache.get(context.user.id);
 		}
 	}
 
@@ -107,7 +107,8 @@ class ContextGenerator {
 		}
 		if (context.guild) {
 			context.guildStorage = dataHandler.getGuildStorage(context.guild.id);
-			context.botMember = context.guild.members.resolve(context.client.user.id);
+			if (context.guild.members.cache.has(context.client.user.id))
+				context.botMember = context.guild.members.cache.get(context.client.user.id);
 		}
 	}
 
