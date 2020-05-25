@@ -20,7 +20,7 @@ module.exports = class ApproverRole extends BaseCommand {
 					key: "role",
 					prompt: "Role to allow application approvals for.",
 					type: "role",
-					default: "none"
+					default: ""
 				}
 			]
 		});

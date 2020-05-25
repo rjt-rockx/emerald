@@ -20,7 +20,7 @@ module.exports = class AttachmentLog extends BaseCommand {
 					key: "channel",
 					prompt: "Channel to log attachments in.",
 					type: "text-channel",
-					default: "none"
+					default: ""
 				}
 			]
 		});
@@ -29,7 +29,7 @@ module.exports = class AttachmentLog extends BaseCommand {
 	async task(ctx) {
 		let logChannel = ctx.guildStorage.get("attachmentLogChannel");
 		if (ctx.args.enabled === "enable") {
-			if (ctx.args.channel === "none") {
+			if (!ctx.args.channel) {
 				if (!logChannel) return ctx.embed({ description: "Invalid attachment log channel specified." });
 				if (ctx.guild.channels.cache.has(logChannel)) {
 					const perms = ctx.client.channels.cache.get(logChannel).permissionsFor(ctx.client.user);
