@@ -4,11 +4,11 @@ const { Util: { splitMessage, resolveString } } = require("discord.js");
 const chunk = (arrayLike, size) => arrayLike.length === 0 ? [] : [arrayLike.slice(0, size)].concat(chunk(arrayLike.slice(size), size));
 
 module.exports = class Paginator {
-	constructor(ctx, fields, options) {
+	constructor({ channel, user }, fields, options) {
 		this.back = "◀";
 		this.next = "▶";
 		this.stop = "⏹";
-		this.member = ctx.member;
+		this.user = user;
 		this.fields = fields;
 		if (!options) options = {};
 		this.timeout = options.timeout && Number.isSafeInteger(options.timeout) && options.timeout <= 300 && options.timeout > 0 ? options.timeout : 15;
@@ -25,7 +25,7 @@ module.exports = class Paginator {
 		this.total = this.fields.length;
 		this.embedTemplate = typeof options.embedTemplate === "object" ? options.embedTemplate : {};
 
-		ctx.channel.send(new MessageEmbed({
+		channel.send(new MessageEmbed({
 			...this.embedTemplate,
 			fields: this.fields[this.current],
 			footer: this.footer
@@ -36,7 +36,7 @@ module.exports = class Paginator {
 			await this.message.react(this.back);
 			await this.message.react(this.next);
 			if (this.total > 2) await this.message.react(this.stop);
-			this.collector = this.message.createReactionCollector((reaction, user) => reaction.me && user.id === this.member.id && user.id !== this.message.author.id, { time: this.timeout * 1000 });
+			this.collector = this.message.createReactionCollector((reaction, user) => reaction.me && user.id === this.user.id && user.id !== this.message.author.id, { time: this.timeout * 1000 });
 
 			const paginate = async reaction => {
 				if (reaction.partial) await reaction.fetch().catch(() => { });
@@ -44,13 +44,13 @@ module.exports = class Paginator {
 					case this.back: {
 						this.current--;
 						if (this.current < 0) this.current = this.total - 1;
-						reaction.users.remove(ctx.member).catch(() => { });
+						reaction.users.remove(user).catch(() => { });
 						break;
 					}
 					case this.next: {
 						this.current++;
 						if (this.current > this.total - 1) this.current = 0;
-						reaction.users.remove(ctx.member).catch(() => { });
+						reaction.users.remove(user).catch(() => { });
 						break;
 					}
 					case this.stop: {
