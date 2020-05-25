@@ -28,7 +28,7 @@ module.exports = class ApplicationChannel extends BaseCommand {
 
 	async task(ctx) {
 		const applicationChannelID = ctx.guildStorage.get("applicationChannel");
-		const applicationChannel = await ctx.guild.channels.fetch(applicationChannelID).catch(() => {});
+		const applicationChannel = ctx.guild.channels.cache.get(applicationChannelID);
 		const requiredPermissions = ["SEND_MESSAGES", "ATTACH_FILES", "EMBED_LINKS", "ADD_REACTIONS"];
 		if (ctx.args.action === "get" && !applicationChannelID) {
 			ctx.embed({ description: "No application channel set for this guild." });

@@ -28,7 +28,7 @@ module.exports = class ArchiveChannel extends BaseCommand {
 
 	async task(ctx) {
 		const archiveChannelID = ctx.guildStorage.get("archiveChannel");
-		const archiveChannel = await ctx.guild.channels.fetch(archiveChannelID).catch(() => {});
+		const archiveChannel = ctx.guild.channels.cache.get(archiveChannelID);
 		const requiredPermissions = ["SEND_MESSAGES", "ATTACH_FILES", "EMBED_LINKS", "ADD_REACTIONS"];
 		if (ctx.args.action === "get" && !archiveChannelID) {
 			ctx.embed({ description: "No archive channel set for this guild." });
