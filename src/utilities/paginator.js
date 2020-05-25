@@ -91,25 +91,30 @@ module.exports = class Paginator {
 		let newFields = fields;
 		const longFields = newFields.map((field, index) => ({ ...field, long: field.value.length > lengths.value, index })).filter(field => field.long && (typeof field.index !== "undefined"));
 		for (const longField of longFields) {
-			const splitFields = this.splitText(longField.value, { maxLength: lengths.value }).map(value => ({ name: longField.name, value, inline: !!longField.inline }));
+			let splitFields = this.splitText(longField.value, { maxLength: lengths.value }).map(value => ({ name: longField.name, value, inline: !!longField.inline }));
+			if (splitFields.length === 2) {
+				const continueString = "... (contd.)";
+				splitFields[1].name = (splitFields[1].name.length > lengths.name ? splitFields[1].name.substring(0, lengths.name - continueString.length) : splitFields[1].name) + "... (contd.)";
+				splitFields[1].nameEdited = true;
+			}
+			else if (splitFields.length > 2) {
+				splitFields = splitFields.map((field, splitIndex) => {
+					if (splitIndex) {
+						const continueString = `... (contd.${splitIndex > 1 ? ` - ${splitIndex}` : ""})`;
+						field.name = (field.name > lengths.name ? field.name.substring(0, lengths.name - continueString.length) : field.name) + continueString;
+						field.nameEdited = true;
+					}
+					return field;
+				});
+			}
 			newFields.splice(longField.index, 1, ...splitFields);
 		}
-		if (newFields.length && newFields.length < 2) {
-			newFields[0].name = (newFields[0].name.length > lengths.name ? newFields[0].name.substring(0, lengths.name - 3) : newFields[0].name) + "...";
-		}
-		else if (newFields.length === 2) {
-			const continueString = "... (contd.)";
-			newFields[1].name = (newFields[1].name.length > lengths.name ? newFields[1].name.substring(0, lengths.name - continueString.length) : newFields[1].name) + "... (contd.)";
-		}
-		else if (newFields.length > 2) {
-			newFields = newFields.map((field, splitIndex) => {
-				if (splitIndex) {
-					const continueString = `... (contd.${splitIndex > 1 ? ` - ${splitIndex}` : ""})`;
-					field.name = (field.name > lengths.name ? field.name.substring(0, lengths.name - continueString.length) : field.name) + continueString;
-				}
-				return field;
-			});
-		}
+		newFields = newFields.map(field => {
+			const newField = { name: field.name, value: field.value, inline: !!field.inline };
+			if (!field.nameEdited && field.name.length > lengths.name)
+				newField.name = field.name.substring(0, lengths.name - 3) + "...";
+			return newField;
+		});
 		return newFields;
 	}
 
