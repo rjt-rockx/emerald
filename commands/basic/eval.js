@@ -1,5 +1,5 @@
 const { inspect } = require("util"), Discord = require("discord.js"), Commando = require("discord.js-commando");
-const { escapeRegex, userFunctions, newlinePattern } = require("../../src/utilities/utilities.js");
+const { escapeRegex, deepProps, deepFunctions, userFunctions } = require("../../src/utilities/utilities.js");
 const BaseCommand = require("../../src/base/baseCommand.js");
 
 module.exports = class Eval extends BaseCommand {
@@ -118,7 +118,7 @@ module.exports = class Eval extends BaseCommand {
 
 	makeResultMessages(result, input = null, ctx = this.currentContext) {
 		let inspected = inspect(result, { depth: 0 })
-			.replace(newlinePattern, "\n");
+			.replace(new RegExp("!!NL!!", "g"), "\n");
 		for (const pattern of this.getSensitivePatterns(ctx)) inspected = inspected.replace(pattern, "[CENSORED]");
 		const split = inspected.split("\n");
 		const lastInspected = inspected[inspected.length - 1];
