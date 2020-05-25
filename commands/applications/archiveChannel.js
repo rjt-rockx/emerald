@@ -35,14 +35,14 @@ module.exports = class ArchiveChannel extends BaseCommand {
 		}
 		else if (ctx.args.action === "get" && archiveChannelID) {
 			if (!archiveChannel) {
-				ctx.embed({ description: "archive channel does not exist, removing." });
+				ctx.embed({ description: "Archive channel does not exist, removing." });
 				ctx.guildStorage.delete("archiveChannel");
 			}
 			else if (archiveChannel && archiveChannel.permissionsFor(ctx.client.user).has(requiredPermissions)) {
 				ctx.embed({ description: "Bot has insufficient permissions in the current archive channel, removing." });
 				ctx.guildStorage.delete("archiveChannel");
 			}
-			else ctx.embed({ description: `archive channel currently set to ${archiveChannel}.` });
+			else ctx.embed({ description: `Archive channel currently set to ${archiveChannel}.` });
 		}
 		else if (ctx.args.action === "set") {
 			if (!ctx.args.channel || ctx.args.channel.type !== "text")
@@ -52,7 +52,7 @@ module.exports = class ArchiveChannel extends BaseCommand {
 					ctx.embed({ description: "Bot has insufficient permissions in the given archive channel, removing." });
 					ctx.guildStorage.delete("archiveChannel");
 				}
-				else ctx.embed({ description: `archive channel already set to ${ctx.args.channel}.` });
+				else ctx.embed({ description: `Archive channel already set to ${ctx.args.channel}.` });
 			}
 			else if (ctx.args.channel && archiveChannelID !== ctx.args.channel.id) {
 				if (!ctx.args.channel.permissionsFor(ctx.client.user).has(requiredPermissions)) {
@@ -61,13 +61,13 @@ module.exports = class ArchiveChannel extends BaseCommand {
 				}
 				else {
 					ctx.guildStorage.set("archiveChannel", ctx.args.channel.id);
-					ctx.embed({ description: `archive channel successfully set to ${ctx.args.channel}.` });
+					ctx.embed({ description: `Archive channel successfully set to ${ctx.args.channel}.` });
 				}
 			}
 		}
 		else if (ctx.args.action === "remove") {
 			ctx.guildStorage.delete("archiveChannel");
-			ctx.embed({ description: "archive channel successfully removed." });
+			ctx.embed({ description: "Archive channel successfully removed." });
 		}
 	}
 };
