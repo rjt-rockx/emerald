@@ -32,7 +32,7 @@ module.exports = class ApprovalChecker extends BaseService {
 		if (!archiveChannel || !ctx.guild.channels.cache.has(archiveChannel)) return;
 
 		const requiredPermissions = ["SEND_MESSAGES", "ATTACH_FILES", "EMBED_LINKS", "ADD_REACTIONS"];
-		if (!ctx.guild.channels.cache.get(archiveChannel).memberPermissions(ctx.client.user).has(requiredPermissions)) return;
+		if (!ctx.guild.channels.cache.get(archiveChannel).permissionsFor(ctx.client.user).has(requiredPermissions)) return;
 
 		if (!["✅", "❌"].includes(ctx.reaction.emoji.toString())) return;
 
@@ -116,7 +116,7 @@ module.exports = class ApprovalChecker extends BaseService {
 		if (ctx.channel.id !== applicationChannel) return;
 
 		const requiredPermissions = ["SEND_MESSAGES", "ATTACH_FILES", "EMBED_LINKS", "ADD_REACTIONS"];
-		if (!ctx.guild.channels.cache.get(applicationChannel).memberPermissions(this.client.user).has(requiredPermissions)) return;
+		if (!ctx.guild.channels.cache.get(applicationChannel).permissionsFor(this.client.user).has(requiredPermissions)) return;
 
 		await ctx.message.react("✅").catch(() => { });
 		await ctx.message.react("❌").catch(() => { });

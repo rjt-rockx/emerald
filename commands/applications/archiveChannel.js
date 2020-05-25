@@ -38,7 +38,7 @@ module.exports = class ArchiveChannel extends BaseCommand {
 				ctx.embed({ description: "archive channel does not exist, removing." });
 				ctx.guildStorage.delete("archiveChannel");
 			}
-			else if (archiveChannel && archiveChannel.memberPermissions(ctx.client.user).has(requiredPermissions)) {
+			else if (archiveChannel && archiveChannel.permissionsFor(ctx.client.user).has(requiredPermissions)) {
 				ctx.embed({ description: "Bot has insufficient permissions in the current archive channel, removing." });
 				ctx.guildStorage.delete("archiveChannel");
 			}
@@ -48,14 +48,14 @@ module.exports = class ArchiveChannel extends BaseCommand {
 			if (!ctx.args.channel || ctx.args.channel.type !== "text")
 				ctx.embed({ description: "Invalid channel specified." });
 			else if (ctx.args.channel && archiveChannelID === ctx.args.channel.id) {
-				if (archiveChannel && archiveChannel.memberPermissions(ctx.client.user).has(requiredPermissions)) {
+				if (archiveChannel && archiveChannel.permissionsFor(ctx.client.user).has(requiredPermissions)) {
 					ctx.embed({ description: "Bot has insufficient permissions in the given archive channel, removing." });
 					ctx.guildStorage.delete("archiveChannel");
 				}
 				else ctx.embed({ description: `archive channel already set to ${ctx.args.channel}.` });
 			}
 			else if (ctx.args.channel && archiveChannelID !== ctx.args.channel.id) {
-				if (!ctx.args.channel.memberPermissions(ctx.client.user).has(requiredPermissions)) {
+				if (!ctx.args.channel.permissionsFor(ctx.client.user).has(requiredPermissions)) {
 					ctx.embed({ description: "Bot has insufficient permissions in the given archive channel, removing." });
 					ctx.guildStorage.delete("archiveChannel");
 				}
