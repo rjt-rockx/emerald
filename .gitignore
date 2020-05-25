@@ -111,3 +111,6 @@ dist
 # Database
 /*.db
 /*.sqlite
+
+# Keyfile
+keyfile.json
