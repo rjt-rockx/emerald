@@ -118,7 +118,8 @@ module.exports = class Eval extends BaseCommand {
 
 	makeResultMessages(result, input = null, ctx = this.currentContext) {
 		let inspected = inspect(result, { depth: 0 })
-			.replace(new RegExp("!!NL!!", "g"), "\n");
+			.replace(new RegExp("!!NL!!", "g"), "\n")
+			.replace(new RegExp("`", "g"), "\\`");
 		for (const pattern of this.getSensitivePatterns(ctx)) inspected = inspected.replace(pattern, "[CENSORED]");
 		const split = inspected.split("\n");
 		const lastInspected = inspected[inspected.length - 1];
