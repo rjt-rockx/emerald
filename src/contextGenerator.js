@@ -116,7 +116,7 @@ class ContextGenerator {
 		if (context.message) {
 			context.msg = context.message;
 			context.react = (...data) => context.message.react(...data);
-			context.code = (...data) => context.message.code(...data);
+			context.code = (content, language, ...data) => context.message.code(language, content, ...data);
 			context.send = (...data) => context.message.say(...data);
 			context.say = (...data) => context.message.say(...data);
 			context.edit = (...data) => context.message.edit(...data);
