@@ -1,9 +1,10 @@
 module.exports = class baseService {
-	constructor(client, serviceInfo) {
+	constructor(client, serviceInfo = {}) {
 		this.client = client;
 		this._name = serviceInfo.name ? serviceInfo.name : this.constructor.name;
 		this._description = serviceInfo.description ? serviceInfo.description : "No description specified.";
 		this.enabled = typeof serviceInfo.enabled === "boolean" ? serviceInfo.enabled : true;
+		this.fetchPartials = !!serviceInfo.fetchPartials;
 	}
 
 	get id() {

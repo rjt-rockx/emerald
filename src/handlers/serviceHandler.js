@@ -126,22 +126,25 @@ class ServiceHandler {
 	}
 
 	async runClientEvent(event, args) {
-		for (const service of this.services)
-			if (typeof service[onText(event)] === "function" && service.enabled) {
-				const context = this.client.contextGenerator[event](...args);
-				if (typeof context !== "undefined")
-					service[onText(event)](context);
-			}
+		const context = this.client.contextGenerator[event](...args);
+		this.services
+			.filter(service => typeof service[onText(event)] === "function" && service.enabled)
+			.forEach(service => {
+				if (service.fetchPartials)
+					return context.fetchPartials().then(ctx => service[onText(event)](ctx));
+				return Promise.resolve(service[onText(event)](context));
+			});
 	}
 
 	async runTimedEvent(event, args) {
-		for (const service of this.services) {
-			if (typeof service[everyText(event)] === "function" && service.enabled) {
-				const context = this.client.contextGenerator.timedEvent(...args);
-				if (typeof context !== "undefined")
-					service[everyText(event)](context);
-			}
-		}
+		const context = this.client.contextGenerator.timedEvent(...args);
+		this.services
+			.filter(service => typeof service[everyText(event)] === "function" && service.enabled)
+			.forEach(service => {
+				if (service.fetchPartials)
+					return context.fetchPartials().then(ctx => service[everyText(event)](ctx));
+				return Promise.resolve(service[everyText(event)](context));
+			});
 	}
 
 	registerClientEvents() {
