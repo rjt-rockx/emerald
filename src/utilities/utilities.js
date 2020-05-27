@@ -3,6 +3,8 @@ const escapeRegex = text => text.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&").replace(
 const deepProps = x => x && x !== Object.prototype && Object.getOwnPropertyNames(x).concat(deepProps(Object.getPrototypeOf(x)) || []);
 const deepFunctions = x => deepProps(x).filter(name => typeof x[name] === "function");
 const userFunctions = x => [...new Set(deepFunctions(x).filter(name => name !== "constructor" && !~name.indexOf("_")))];
+const onText = str => str.replace(/\w\S*/g, txt => "on" + txt.charAt(0).toUpperCase() + txt.substr(1));
+const everyText = str => str.replace(/\w\S*/g, txt => "every" + txt.charAt(0).toUpperCase() + txt.substr(1));
 const toTitleCase = str => str.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1));
 const properRoundToTwo = num => +(Math.round(num + "e+2") + "e-2");
 const camelCase = data => data.replace(/(_\w)/g, text => text[1].toUpperCase());
@@ -35,5 +37,7 @@ module.exports = {
 	properRoundToTwo,
 	camelCase,
 	camelCaseKeys,
+	onText,
+	everyText,
 	DiscordColors
 };

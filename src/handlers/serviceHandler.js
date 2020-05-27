@@ -1,9 +1,6 @@
-const { readdirSync } = require("fs"), { join, resolve } = require("path");
-const onText = str => str.replace(/\w\S*/g, txt => "on" + txt.charAt(0).toUpperCase() + txt.substr(1));
-const everyText = str => str.replace(/\w\S*/g, txt => "every" + txt.charAt(0).toUpperCase() + txt.substr(1));
-const deepProps = x => x && x !== Object.prototype && Object.getOwnPropertyNames(x).concat(deepProps(Object.getPrototypeOf(x)) || []);
-const deepFunctions = x => deepProps(x).filter(name => typeof x[name] === "function");
-const userFunctions = x => new Set(deepFunctions(x).filter(name => name !== "constructor" && !~name.indexOf("__")));
+const { readdirSync } = require("fs");
+const { join, resolve } = require("path");
+const { onText, everyText, userFunctions } = require("../utilities/utilities.js");
 
 const BaseService = require("../base/baseService.js");
 
@@ -101,7 +98,7 @@ class ServiceHandler {
 	getServiceEvents(id) {
 		const service = this.getService(id);
 		if (!service) return;
-		const serviceListeners = [...userFunctions(service)];
+		const serviceListeners = userFunctions(service);
 		return this.events.filter(event => serviceListeners.includes(onText(event)) || serviceListeners.includes(everyText(event)));
 	}
 
@@ -148,7 +145,7 @@ class ServiceHandler {
 	}
 
 	registerClientEvents() {
-		this.usedEvents = this.services.reduce((events, service) => events.concat([...userFunctions(service)]), [])
+		this.usedEvents = this.services.reduce((events, service) => events.concat(userFunctions(service)), [])
 			.filter(eventName => eventName.startsWith("on") || eventName.startsWith("every"))
 			.sort().filter((eventName, index, self) => self.indexOf(eventName) === index);
 		this.clientEvents = this.events.filter(event => this.usedEvents.includes(onText(event)));
