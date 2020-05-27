@@ -21,6 +21,7 @@ module.exports = class ReactionLog extends BaseService {
 
 	async onMessageReactionAdd(ctx) {
 		if (!ctx || ctx.user.bot || !ctx.user || !ctx.reaction || ctx.reaction.message.author.bot) return;
+		await ctx.fetchPartials();
 
 		let errorReported = false;
 		const errors = () => errorReported = true;
@@ -72,6 +73,7 @@ module.exports = class ReactionLog extends BaseService {
 
 	async onMessageReactionRemove(ctx) {
 		if (!ctx || !ctx.user || ctx.user.bot || !ctx.reaction || ctx.reaction.message.author.bot) return;
+		await ctx.fetchPartials();
 
 		let errorReported = false;
 		const errors = () => errorReported = true;
@@ -121,6 +123,7 @@ module.exports = class ReactionLog extends BaseService {
 
 	async onMessageReactionRemoveEmoji(ctx) {
 		if (!ctx || !ctx.reaction || ctx.reaction.message.author.bot) return;
+		await ctx.fetchPartials();
 
 		let errorReported = false;
 		const errors = () => errorReported = true;

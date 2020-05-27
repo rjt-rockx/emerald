@@ -2,139 +2,191 @@ const { MessageEmbed } = require("discord.js");
 const logger = require("./utilities/logger.js");
 const paginator = require("./utilities/paginator.js");
 const dataHandler = require("./handlers/dataHandler.js");
-
-const camelCase = data => data.replace(/(_\w)/g, text => text[1].toUpperCase());
-const camelCaseKeys = data => {
-	const newData = {};
-	for (const property in data) {
-		if (Object.hasOwnProperty.apply(data, property))
-			newData[camelCase(property)] = data[property];
+const { camelCase, camelCaseKeys } = require("./utilities/utilities.js");
+class Context {
+	constructor(client, event) {
+		this.client = client;
+		this.event = event;
+		this.emittedAt = new Date();
+		this.logger = logger;
+		this.paginator = paginator;
+		this.paginate = (...data) => this.paginator(this, ...data);
+		this.partialErrorHandler = () => { };
 	}
-	return newData;
-};
+
+	async fetchPartials() {
+		const props = ["message", "newMessage", "channel", "newChannel", "oldChannel", "reaction", "oldMessage", "newMessage"];
+		this.resolvedPartials = await Promise.all(props.map(prop => {
+			if (this[prop] && this[prop].partial)
+				return this[prop].fetch().catch((...args) => this.partialErrorHandler(...args));
+			return Promise.resolve(this[prop]);
+		}));
+		return this;
+	}
+
+	get message() {
+		return this._message
+			|| (this.reaction && this.reaction.message)
+			|| this.newMessage;
+	}
+
+	set message(message) {
+		this._message = message;
+	}
+
+	get command() {
+		return this._message && this._message.command;
+	}
+
+	get user() {
+		return this._user
+			|| (this._member && this._member.user)
+			|| (this._message && this._message.author)
+			|| (this.invite && this.invite.inviter)
+			|| this.newUser;
+	}
+
+	set user(user) {
+		this._user = user;
+	}
+
+	get member() {
+		return this._member
+			|| this.newMember
+			|| (this._guild && this._user && this._guild.members.resolve(this._user.id));
+	}
+
+	set member(member) {
+		this._member = member;
+	}
+
+	get channel() {
+		return this._channel
+			|| (this._message && this._message.channel)
+			|| (this.reaction && this.reaction.message && this.reaction.message.channel)
+			|| (this._messages && this._messages.first().channel)
+			|| (this.invite && this.invite.channel)
+			|| this.newChannel;
+	}
+
+	set channel(channel) {
+		this._channel = channel;
+	}
+
+	get role() {
+		return this._role
+			|| this.newRole;
+	}
+
+	set role(role) {
+		this._role = role;
+	}
+
+	get guild() {
+		return this._guild
+			|| (this._message && this._message.guild)
+			|| (this._channel && this._channel.guild)
+			|| (this.emoji && this.emoji.guild)
+			|| (this.reaction && this.reaction.message && this.reaction.message.guild)
+			|| (this.newEmoji && this.newEmoji.guild)
+			|| (this._member && this._member.guild)
+			|| (this.newMember && this.newMember.guild)
+			|| (this._role && this._role.guild)
+			|| (this.invite && this.invite.guild)
+			|| this.newGuild;
+	}
+
+	set guild(guild) {
+		this._guild = guild;
+	}
+
+	get globalStorage() {
+		return dataHandler.getGlobalStorage();
+	}
+
+	get guildStorage() {
+		return this.guild && dataHandler.getGuildStorage(this.guild.id);
+	}
+
+	get bot() {
+		return this.client.user;
+	}
+
+	get botMember() {
+		return this.guild && this.guild.members.resolve(this.bot);
+	}
+
+	get msg() {
+		return this.message;
+	}
+
+	get prefix() {
+		return (this.guild && this.guild.commandPrefix)
+			|| this.client.commandPrefix;
+	}
+
+	react(...data) {
+		return this.message && this.message.react(...data);
+	}
+
+	code(content, language, ...data) {
+		return this.message && this.message.code(language, content, ...data);
+	}
+
+	send(...data) {
+		return this.message && this.message.say(...data);
+	}
+
+	say(...data) {
+		return this.message && this.message.say(...data);
+	}
+
+	edit(...data) {
+		return this.message && this.message.edit(...data);
+	}
+
+	reply(...data) {
+		return this.message && this.message.reply(...data);
+	}
+
+	replyEmbed(...data) {
+		return this.message && this.message.replyEmbed(...data);
+	}
+
+	embed(...data) {
+		return this.message && (
+			data[0] instanceof String
+				? this.message.embed({ description: data[0] })
+				: this.message.embed(...data)
+		);
+	}
+
+	dm(...data) {
+		return this.user && this.user.send(...data);
+	}
+
+	dmEmbed(...data) {
+		return this.user && (
+			data[0] instanceof String
+				? this.user.send(new MessageEmbed({ description: data[0] }))
+				: this.user.send(...data)
+		);
+	}
+
+	selfDestruct(data, seconds = 10) {
+		return this.channel && this.channel.send(data).then(m => m.delete({ timeout: seconds * 1000 }));
+	}
+
+	selfDestructEmbed(data, seconds = 10) {
+		return this.channel && this.channel.send(new MessageEmbed(data)).then(m => m.delete({ timeout: seconds * 1000 }));
+	}
+}
 
 class ContextGenerator {
 	async initialize(client) {
 		this.client = client;
-		this.client.context = this;
-		this.defaultCtx = {
-			client: this.client,
-			globalStorage: dataHandler.getGlobalStorage(),
-			logger, paginator
-		};
+		this.client.contextGenerator = this;
 		return this;
-	}
-
-	partialErrorHandler() { }
-
-	get defaultContext() {
-		const context = { ...this.defaultCtx };
-		context.paginate = (...data) => new context.paginator(context, ...data);
-		context.emittedAt = new Date();
-		return context;
-	}
-
-	async fetchPartials(context) {
-		const props = ["message", "newMessage", "channel", "newChannel", "oldChannel", "reaction", "oldMessage", "newMessage"];
-		return Promise.all(props.map(prop => {
-			if (prop in context && context[prop].partial)
-				return context[prop].fetch().catch((...args) => this.partialErrorHandler(...args));
-			return Promise.resolve(context[prop]);
-		}));
-	}
-
-	getMessage(context) {
-		if (context.reaction && context.reaction.message)
-			context.message = context.reaction.message;
-		if (context.newMessage)
-			context.message = context.newMessage;
-	}
-
-	getUser(context) {
-		if (!context.user) {
-			if (context.member && context.member.user)
-				context.user = context.member.user;
-			if (context.newMember && context.newMember.user)
-				context.user = context.newMember.user;
-			if (context.message)
-				context.user = context.message.author;
-			if (context.newUser)
-				context.user = context.newUser;
-			if (context.invite && context.invite.inviter)
-				context.user = context.invite.inviter;
-		}
-	}
-
-	getMember(context) {
-		if (!context.member) {
-			if (context.newMember)
-				context.member = context.newMember;
-			if (context.guild && context.user && !context.member)
-				if (context.guild.members.cache.has(context.user.id))
-					context.member = context.guild.members.cache.get(context.user.id);
-		}
-	}
-
-	getChannel(context) {
-		if (context.message && context.message.channel)
-			context.channel = context.message.channel;
-		if (context.newChannel)
-			context.channel = context.newChannel;
-		if (context.messages)
-			context.channel = context.messages.first().channel;
-		if (context.invite && context.invite.channel)
-			context.channel = context.invite.channel;
-	}
-
-	getGuild(context) {
-		if (!context.guild) {
-			if (context.channel && context.channel.guild)
-				context.guild = context.channel.guild;
-			if (context.emoji && context.emoji.guild)
-				context.guild = context.emoji.guild;
-			if (context.newEmoji && context.newEmoji.guild)
-				context.guild = context.newEmoji.guild;
-			if (context.member)
-				context.guild = context.member.guild;
-			if (context.newMember && context.newMember.guild)
-				context.guild = context.newMember.guild;
-			if (context.newGuild)
-				context.guild = context.newGuild;
-			if (context.role)
-				context.guild = context.role.guild;
-			if (context.invite)
-				context.guild = context.invite.guild;
-		}
-		if (context.guild) {
-			context.guildStorage = dataHandler.getGuildStorage(context.guild.id);
-			if (context.guild.members.cache.has(context.client.user.id))
-				context.botMember = context.guild.members.cache.get(context.client.user.id);
-		}
-	}
-
-	attachExtras(context) {
-		if (context.message) {
-			context.msg = context.message;
-			context.react = (...data) => context.message.react(...data);
-			context.code = (content, language, ...data) => context.message.code(language, content, ...data);
-			context.send = (...data) => context.message.say(...data);
-			context.say = (...data) => context.message.say(...data);
-			context.edit = (...data) => context.message.edit(...data);
-			context.reply = (...data) => context.message.reply(...data);
-			context.replyEmbed = (...data) => context.message.replyEmbed(...data);
-			context.embed = (...data) => context.message.embed(...data);
-			if (context.message.command)
-				context.command = context.message.command;
-		}
-		if (context.user) {
-			context.dm = (...data) => context.user.send(...data);
-			context.dmEmbed = data => data instanceof MessageEmbed ? context.dm(data) : context.dm(new MessageEmbed(data));
-		}
-		if (context.channel) {
-			context.selfDestruct = (data, seconds = 10) => context.channel.send(data).then(msg => msg.delete({ timeout: seconds * 1000 }));
-			context.selfDestructEmbed = (data, seconds = 10) => context.channel.send(new MessageEmbed(data)).then(msg => msg.delete({ timeout: seconds * 1000 }));
-		}
-		context.prefix = context.guild && context.guild.commandPrefix ? context.guild.commandPrefix : context.client.commandPrefix;
 	}
 
 	timedEvent() {
@@ -142,390 +194,241 @@ class ContextGenerator {
 	}
 
 	raw(...args) {
-		let context = this.defaultContext;
+		const context = new Context(this.client, "raw");
 		const [{ data, type }] = args;
-		if (data && type)
-			context = {
-				...context,
-				data: camelCaseKeys(data),
-				type: camelCase(type.toLowerCase())
-			};
+		if (data && type) {
+			context.data = camelCaseKeys(data);
+			context.type = camelCase(type.toLowerCase());
+		}
 		return context;
 	}
 
-	async channelCreate(...args) {
-		const context = this.defaultContext;
+	channelCreate(...args) {
+		const context = new Context(this.client, "channelCreate");
 		[context.channel] = args;
-		this.getGuild(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async channelDelete(...args) {
-		const context = this.defaultContext;
+	channelDelete(...args) {
+		const context = new Context(this.client, "channelDelete");
 		[context.channel] = args;
-		this.getGuild(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async channelPinsUpdate(...args) {
-		const context = this.defaultContext;
+	channelPinsUpdate(...args) {
+		const context = new Context(this.client, "channelPinsUpdate");
 		[context.channel, context.time] = args;
-		this.getGuild(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async channelUpdate(...args) {
-		const context = this.defaultContext;
+	channelUpdate(...args) {
+		const context = new Context(this.client, "channelUpdate");
 		[context.oldChannel, context.newChannel] = args;
-		this.getChannel(context);
-		this.getGuild(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
 	debug(...args) {
-		const context = this.defaultContext;
+		const context = new Context(this.client, "debug");
 		[context.info] = args;
 		return context;
 	}
 
 	warn(...args) {
-		const context = this.defaultContext;
+		const context = new Context(this.client, "warn");
 		[context.info] = args;
 		return context;
 	}
 
-	async emojiCreate(...args) {
-		const context = this.defaultContext;
+	emojiCreate(...args) {
+		const context = new Context(this.client, "emojiCreate");
 		[context.emoji] = args;
-		this.getGuild(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async emojiDelete(...args) {
-		const context = this.defaultContext;
+	emojiDelete(...args) {
+		const context = new Context(this.client, "emojiDelete");
 		[context.emoji] = args;
-		this.getGuild(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async emojiUpdate(...args) {
-		const context = this.defaultContext;
+	emojiUpdate(...args) {
+		const context = new Context(this.client, "emojiUpdate");
 		[context.oldEmoji, context.newEmoji] = args;
-		this.getGuild(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async guildBanAdd(...args) {
-		const context = this.defaultContext;
+	guildBanAdd(...args) {
+		const context = new Context(this.client, "guildBanAdd");
 		[context.guild, context.user] = args;
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async guildBanRemove(...args) {
-		const context = this.defaultContext;
+	guildBanRemove(...args) {
+		const context = new Context(this.client, "guildBanRemove");
 		[context.guild, context.user] = args;
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async guildCreate(...args) {
-		const context = this.defaultContext;
+	guildCreate(...args) {
+		const context = new Context(this.client, "guildCreate");
 		[context.guild] = args;
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async guildDelete(...args) {
-		const context = this.defaultContext;
+	guildDelete(...args) {
+		const context = new Context(this.client, "guildDelete");
 		[context.guild] = args;
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async guildMemberAdd(...args) {
-		const context = this.defaultContext;
+	guildMemberAdd(...args) {
+		const context = new Context(this.client, "guildMemberAdd");
 		[context.member] = args;
-		this.getUser(context);
-		this.getGuild(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async guildMemberRemove(...args) {
-		const context = this.defaultContext;
+	guildMemberRemove(...args) {
+		const context = new Context(this.client, "guildMemberRemove");
 		[context.member] = args;
-		this.getUser(context);
-		this.getGuild(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async guildMemberUpdate(...args) {
-		const context = this.defaultContext;
+	guildMemberUpdate(...args) {
+		const context = new Context(this.client, "guildMemberUpdate");
 		[context.oldMember, context.newMember] = args;
-		this.getUser(context);
-		this.getGuild(context);
-		this.getMember(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async inviteCreate(...args) {
-		const context = this.defaultContext;
+	inviteCreate(...args) {
+		const context = new Context(this.client, "inviteCreate");
 		[context.invite] = args;
-		this.getUser(context);
-		this.getChannel(context);
-		this.getGuild(context);
-		this.getMember(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async inviteDelete(...args) {
-		const context = this.defaultContext;
+	inviteDelete(...args) {
+		const context = new Context(this.client, "inviteDelete");
 		[context.invite] = args;
-		this.getUser(context);
-		this.getChannel(context);
-		this.getGuild(context);
-		this.getMember(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async presenceUpdate(...args) {
-		const context = this.defaultContext;
+	presenceUpdate(...args) {
+		const context = new Context(this.client, "presenceUpdate");
 		[context.oldMember, context.newMember] = args;
-		this.getUser(context);
-		this.getGuild(context);
-		this.getMember(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async voiceStateUpdate(...args) {
-		const context = this.defaultContext;
+	voiceStateUpdate(...args) {
+		const context = new Context(this.client, "voiceStateUpdate");
 		[context.oldMember, context.newMember] = args;
-		this.getUser(context);
-		this.getGuild(context);
-		this.getMember(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async guildMemberSpeaking(...args) {
-		const context = this.defaultContext;
+	guildMemberSpeaking(...args) {
+		const context = new Context(this.client, "guildMemberSpeaking");
 		[context.member, context.speaking] = args;
-		this.getUser(context);
-		this.getGuild(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async guildUpdate(...args) {
-		const context = this.defaultContext;
+	guildUpdate(...args) {
+		const context = new Context(this.client, "guildUpdate");
 		[context.oldGuild, context.newGuild] = args;
-		this.getGuild(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async commandMessage(...args) {
-		const context = this.defaultContext;
+	commandMessage(...args) {
+		const context = new Context(this.client, "commandMessage");
 		[context.message, context.args, context.fromPattern] = args;
-		this.getUser(context);
-		this.getChannel(context);
-		this.getGuild(context);
-		this.getMember(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async message(...args) {
-		const context = this.defaultContext;
+	message(...args) {
+		const context = new Context(this.client, "message");
 		[context.message] = args;
-		this.getUser(context);
-		this.getChannel(context);
-		this.getGuild(context);
-		this.getMember(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async messageDelete(...args) {
-		const context = this.defaultContext;
+	messageDelete(...args) {
+		const context = new Context(this.client, "messageDelete");
 		[context.message] = args;
-		this.getUser(context);
-		this.getChannel(context);
-		this.getGuild(context);
-		this.getMember(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async messageReactionRemoveAll(...args) {
-		const context = this.defaultContext;
+	messageReactionRemoveAll(...args) {
+		const context = new Context(this.client, "messageReactionRemoveAll");
 		[context.message] = args;
-		this.getUser(context);
-		this.getChannel(context);
-		this.getGuild(context);
-		this.getMember(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async messageDeleteBulk(...args) {
-		const context = this.defaultContext;
+	messageDeleteBulk(...args) {
+		const context = new Context(this.client, "messageDeleteBulk");
 		[context.messages] = args;
-		this.getChannel(context);
-		this.getGuild(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async messageReactionAdd(...args) {
-		const context = this.defaultContext;
+	messageReactionAdd(...args) {
+		const context = new Context(this.client, "messageReactionAdd");
 		[context.reaction, context.user] = args;
-		this.getMessage(context);
-		this.getChannel(context);
-		this.getGuild(context);
-		this.getMember(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async messageReactionRemove(...args) {
-		const context = this.defaultContext;
+	messageReactionRemove(...args) {
+		const context = new Context(this.client, "messageReactionRemove");
 		[context.reaction, context.user] = args;
-		this.getMessage(context);
-		this.getChannel(context);
-		this.getGuild(context);
-		this.getMember(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async messageReactionRemoveEmoji(...args) {
-		const context = this.defaultContext;
+	messageReactionRemoveEmoji(...args) {
+		const context = new Context(this.client, "messageReactionRemoveEmoji");
 		[context.reaction] = args;
-		this.getMessage(context);
-		this.getChannel(context);
-		this.getGuild(context);
-		this.getMember(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async messageUpdate(...args) {
-		const context = this.defaultContext;
+	messageUpdate(...args) {
+		const context = new Context(this.client, "messageUpdate");
 		[context.oldMessage, context.newMessage] = args;
-		this.getMessage(context);
-		this.getChannel(context);
-		this.getGuild(context);
-		this.getMember(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async roleCreate(...args) {
-		const context = this.defaultContext;
+	roleCreate(...args) {
+		const context = new Context(this.client, "roleCreate");
 		[context.role] = args;
-		this.getGuild(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async roleDelete(...args) {
-		const context = this.defaultContext;
+	roleDelete(...args) {
+		const context = new Context(this.client, "roleDelete");
 		[context.role] = args;
-		this.getGuild(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async roleUpdate(...args) {
-		const context = this.defaultContext;
+	roleUpdate(...args) {
+		const context = new Context(this.client, "roleUpdate");
 		[context.oldRole, context.newRole] = args;
 		context.role = context.newRole;
-		this.getGuild(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async typingStart(...args) {
-		const context = this.defaultContext;
+	typingStart(...args) {
+		const context = new Context(this.client, "typingStart");
 		[context.channel, context.user] = args;
-		this.getGuild(context);
-		this.getMember(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async typingStop(...args) {
-		const context = this.defaultContext;
+	typingStop(...args) {
+		const context = new Context(this.client, "typingStop");
 		[context.channel, context.user] = args;
-		this.getGuild(context);
-		this.getMember(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async userUpdate(...args) {
-		const context = this.defaultContext;
+	userUpdate(...args) {
+		const context = new Context(this.client, "userUpdate");
 		[context.oldUser, context.newUser] = args;
-		this.getUser(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 
-	async webhookUpdate(...args) {
-		const context = this.defaultContext;
+	webhookUpdate(...args) {
+		const context = new Context(this.client, "webhookUpdate");
 		[context.channel] = args;
-		this.getGuild(context);
-		this.attachExtras(context);
-		await this.fetchPartials(context);
 		return context;
 	}
 }

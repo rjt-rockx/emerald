@@ -88,7 +88,7 @@ module.exports = class BaseCommand extends Command {
 	}
 
 	async run(...args) {
-		const context = await this.client.context.commandMessage(...args);
+		const context = await this.client.contextGenerator.commandMessage(...args).fetchPartials();
 		let commandPermissions = this.checkGlobalCommandPermissions(context);
 		if (commandPermissions.permitted && context.guild)
 			commandPermissions = this.checkGuildCommandPermissions(context);

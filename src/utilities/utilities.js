@@ -5,6 +5,15 @@ const deepFunctions = x => deepProps(x).filter(name => typeof x[name] === "funct
 const userFunctions = x => [...new Set(deepFunctions(x).filter(name => name !== "constructor" && !~name.indexOf("_")))];
 const toTitleCase = str => str.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1));
 const properRoundToTwo = num => +(Math.round(num + "e+2") + "e-2");
+const camelCase = data => data.replace(/(_\w)/g, text => text[1].toUpperCase());
+const camelCaseKeys = data => {
+	const newData = {};
+	for (const property in data) {
+		if (Object.hasOwnProperty.apply(data, property))
+			newData[camelCase(property)] = data[property];
+	}
+	return newData;
+};
 const DiscordColors = {
 	RED: 0xF04747,
 	GREEN: 0x43B581,
@@ -17,4 +26,14 @@ const DiscordColors = {
 	DARKER_GREY: 0x23272A
 };
 
-module.exports = { escapeRegex, deepProps, deepFunctions, userFunctions, toTitleCase, properRoundToTwo, DiscordColors };
+module.exports = {
+	escapeRegex,
+	deepProps,
+	deepFunctions,
+	userFunctions,
+	toTitleCase,
+	properRoundToTwo,
+	camelCase,
+	camelCaseKeys,
+	DiscordColors
+};
