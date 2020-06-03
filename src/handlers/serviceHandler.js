@@ -4,20 +4,19 @@ const { onText, everyText, userFunctions } = require("../utilities/utilities.js"
 
 const BaseService = require("../base/baseService.js");
 
-const intervals = {
-	minute: 60,
-	fiveMinutes: 300,
-	fifteenMinutes: 900,
-	halfAnHour: 1800,
-	hour: 3600,
-	day: 86400
-};
-
 class ServiceHandler {
 	async initialize(client) {
 		this.client = client;
 		this.services = [];
-		this.events = [
+		this.intervals = {
+			minute: 60,
+			fiveMinutes: 300,
+			fifteenMinutes: 900,
+			halfAnHour: 1800,
+			hour: 3600,
+			day: 86400
+		};
+		this.clientEvents = [
 			"raw",
 			"channelCreate",
 			"channelDelete",
@@ -58,6 +57,8 @@ class ServiceHandler {
 			"userUpdate",
 			"webhookUpdate"
 		];
+		this.timedEvents = Object.keys(this.intervals);
+		this.usedEvents = new Set();
 		this.addServicesIn("../../services");
 		this.registerClientEvents();
 		this.registerTimedEvents();
@@ -80,7 +81,7 @@ class ServiceHandler {
 
 	addServicesIn(folder) {
 		for (const filename of readdirSync(resolve(__dirname, folder))) {
-			if (filename.endsWith(".js") && !filename.endsWith("index.js")) { // use string methods rather than regex for performance
+			if (filename.endsWith(".js") && !filename.endsWith("index.js")) {
 				const service = require(join(folder, filename));
 				this.addService(service);
 			}
@@ -98,8 +99,7 @@ class ServiceHandler {
 	getServiceEvents(id) {
 		const service = this.getService(id);
 		if (!service) return;
-		const serviceListeners = userFunctions(service);
-		return this.events.filter(event => serviceListeners.includes(onText(event)) || serviceListeners.includes(everyText(event)));
+		return userFunctions(service).filter(listener => this.usedEvents.has(onText(listener)) || this.usedEvents.has(everyText(listener)));
 	}
 
 	enableService(id) {
@@ -144,19 +144,22 @@ class ServiceHandler {
 			});
 	}
 
-	registerClientEvents() {
-		this.usedEvents = this.services.reduce((events, service) => events.concat(userFunctions(service)), [])
+	registerUsedEvents() {
+		this.services.reduce((events, service) => events.concat(userFunctions(service)), [])
 			.filter(eventName => eventName.startsWith("on") || eventName.startsWith("every"))
-			.sort().filter((eventName, index, self) => self.indexOf(eventName) === index);
-		this.clientEvents = this.events.filter(event => this.usedEvents.includes(onText(event)));
-		for (const event of this.clientEvents)
+			.forEach(event => this.usedEvents.add(event));
+	}
+
+	registerClientEvents() {
+		this.usedClientEvents = this.clientEvents.filter(event => this.usedEvents.has(onText(event)));
+		for (const event of this.usedClientEvents)
 			this.client.on(event, (...args) => this.runClientEvent(event, args));
 	}
 
 	registerTimedEvents() {
-		this.timedEvents = Object.keys(intervals).filter(interval => this.usedEvents.includes(everyText(interval)));
-		for (const event of this.timedEvents)
-			setInterval(() => this.runTimedEvent(event, []), intervals[event] * 1000);
+		this.usedTimedEvents = this.timedEvents.filter(interval => this.usedEvents.has(everyText(interval)));
+		for (const event of this.usedTimedEvents)
+			setInterval(() => this.runTimedEvent(event, []), this.intervals[event] * 1000);
 	}
 }
 
