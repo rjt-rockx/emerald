@@ -15,14 +15,12 @@ module.exports = class Disable extends BaseCommand {
 				{
 					key: "command",
 					prompt: "Command to disable",
-					type: "command",
-					default: ""
+					type: "command"
 				},
 				{
 					key: "target",
 					prompt: "Target to disable the command for",
-					type: "contextual|guild|role|user|text-channel|category-channel|voice-channel",
-					default: ""
+					type: "contextual|guild|role|user|text-channel|category-channel|voice-channel"
 				}
 			]
 		});
@@ -33,8 +31,6 @@ module.exports = class Disable extends BaseCommand {
 	}
 
 	async task(ctx) {
-		if (ctx.args.command === "") return ctx.embed({ description: "Invalid command specified." });
-		if (ctx.args.type === "") return ctx.embed({ description: "Invalid type specified." });
 		const commandPermissions = ctx.guildStorage.get("commandPermissions");
 		const newPerms = { id: ctx.args.target.id, enabled: false };
 		if (ctx.args.target instanceof Guild)
