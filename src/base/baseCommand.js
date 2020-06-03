@@ -70,16 +70,18 @@ module.exports = class BaseCommand extends Command {
 			return ctx.embed({ description: "No arguments specified." });
 		else if (ctx.collectedArgs.values && ctx.collectedArgs.values.length && ctx.collectedArgs.cancelledArg) {
 			const { cancelledArg, cancelledValue } = ctx.collectedArgs;
-			let type;
+			let type, isOneOf = false;
 			if (cancelledArg.type.id.includes("|"))
 				type = cancelledArg.type.id.split("|").map(id => id.split("-").join(" ")).map(t => `\`${toTitleCase(t)}\``);
-			if (cancelledArg.type.id === "string" && cancelledArg.oneOf && cancelledArg.oneOf.length)
+			if (cancelledArg.type.id === "string" && cancelledArg.oneOf && cancelledArg.oneOf.length) {
 				type = cancelledArg.oneOf.map(item => typeof item === "string" ? `\`${item}\`` : item);
+				isOneOf = true;
+			}
 			if (!type)
 				type = cancelledArg.type.id.split("-").join(" ");
 			let cancelString = cancelledValue ? `Could not parse ${cancelledValue} as ${["a", "e", "i", "o", "u"].includes(cancelledArg.key[0]) ? "an" : "a"} ${cancelledArg.key}. ` : `No ${cancelledArg.key} specified. `;
 			if (type !== cancelledArg.key) {
-				const typeString = Array.isArray(type) ? `one of these? \n${type.join(", ")}` : `a ${type}?`;
+				const typeString = Array.isArray(type) ? `one of these${!isOneOf ? " types" : ""}? \n${type.join(", ")}` : `a ${type}?`;
 				cancelString += `\nDid you mean to specify ${typeString}`;
 			}
 			return ctx.embed({ description: cancelString });
