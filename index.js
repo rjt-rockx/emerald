@@ -1,10 +1,13 @@
 const config = require("./config.js");
 const { CommandoClient } = require("discord.js-commando");
+const structureHandler = require("./src/handlers/structureHandler.js");
 const serviceHandler = require("./src/handlers/serviceHandler.js");
 const commandHandler = require("./src/handlers/commandHandler.js");
 const dataHandler = require("./src/handlers/dataHandler.js");
 const contextGenerator = require("./src/contextGenerator.js");
 const logger = require("./src/utilities/logger.js");
+
+structureHandler.initialize();
 
 const client = new CommandoClient({
 	owner: config.owners,
