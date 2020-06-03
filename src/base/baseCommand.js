@@ -1,4 +1,5 @@
 const { Command } = require("discord.js-commando");
+const { toTitleCase } = require("../utilities/utilities.js");
 
 module.exports = class BaseCommand extends Command {
 	constructor(client, commandInfo) {
@@ -6,46 +7,8 @@ module.exports = class BaseCommand extends Command {
 			...commandInfo,
 			memberName: commandInfo.memberName || commandInfo.name
 		});
-	}
-
-	checkGuildCommandPermissions(ctx) {
-		let commandPermissions = [];
-		if (ctx.guildStorage.has("commandPermissions"))
-			commandPermissions = ctx.guildStorage.get("commandPermissions");
-		else ctx.guildStorage.set("commandPermissions", []);
-		return this.checkCommandPermissions(ctx, commandPermissions);
-	}
-
-	checkGlobalCommandPermissions(ctx) {
-		let commandPermissions = [];
-		if (ctx.globalStorage.has("commandPermissions"))
-			commandPermissions = ctx.globalStorage.get("commandPermissions");
-		else ctx.globalStorage.set("commandPermissions", []);
-		return this.checkCommandPermissions(ctx, commandPermissions);
-	}
-
-	checkCommandPermissions(ctx, commandPermissions) {
-		let permitted = true, blockReason = {};
-		const currentCommand = commandPermissions.find(permission => permission.command && permission.command === this.name);
-		if (!currentCommand || this.guarded) return { permitted };
-		for (const { type, id, enabled } of currentCommand.permissions) {
-			if (this.matchesConditions(ctx, type, id)) {
-				if (!enabled) blockReason = { type, id };
-				permitted = enabled;
-			}
-		}
-		return { permitted, blockReason };
-	}
-
-	matchesConditions(ctx, type, id) {
-		if (type === "global") return true;
-		if (type === "guild" && ctx.guild.id === id) return true;
-		if (type === "category-channel" && ctx.channel.parentID && ctx.channel.parentID === id) return true;
-		if (type === "text-channel" && ctx.channel.id === id) return true;
-		if (type === "voice-channel" && ctx.member.voice.channelID && ctx.member.voice.channelID === id) return true;
-		if (type === "role" && ctx.member.roles.cache.has(id)) return true;
-		if (type === "user" && ctx.user.id === id) return true;
-		return false;
+		if (this.argsCollector)
+			this.argsCollector.promptLimit = 0;
 	}
 
 	getReadablePermission(ctx, permission) {
@@ -62,17 +25,7 @@ module.exports = class BaseCommand extends Command {
 		return reasons[permission.type](permission.id);
 	}
 
-	beforeExecute(ctx) {
-		// default method that can be called before the command actually executes, can be overriden by the extended command
-	}
-
-	afterExecute(ctx) {
-		// default method that can be called after the command actually executes, can be overriden by the extended command
-		const {cyan, green, gray} = ctx.logger.chalk;
-		ctx.logger.info(`Command ${cyan(ctx.command.name)} was ${green("executed")} by user ${ctx.user.tag} ${gray(`(${ctx.user.id})`)}.`);
-	}
-
-	didNotExecute(ctx, blockReason) {
+	getReadableMissingPermission(ctx, missingPermission) {
 		const reasons = {
 			"global": () => " as this command is disabled globally.",
 			"guild": () => " in this server.",
@@ -82,23 +35,54 @@ module.exports = class BaseCommand extends Command {
 			"role": id => ` with the ${ctx.guild.roles.cache.get(id).name} role.`,
 			"user": () => "."
 		};
-		const {cyan, red, gray} = ctx.logger.chalk;
-		ctx.embed({ description: `You aren't allowed to use this command${reasons[blockReason.type](blockReason.id)}` });
-		ctx.logger.info(`Command ${cyan(ctx.command.name)} was ${red("not executed")} by user ${ctx.user.tag} ${gray(`(${ctx.user.id})`)}${reasons[blockReason.type](blockReason.id)}`);
+		return `You are not allowed use this command${reasons[missingPermission.type](missingPermission.id)}`;
 	}
 
-	async run(...args) {
-		const context = await this.client.contextGenerator.commandMessage(...args).fetchPartials();
-		let commandPermissions = this.checkGlobalCommandPermissions(context);
-		if (commandPermissions.permitted && context.guild)
-			commandPermissions = this.checkGuildCommandPermissions(context);
-		if (commandPermissions.permitted) {
-			await this.beforeExecute(context);
-			await Promise.resolve(this.task(context)).catch(context.logger.error);
-			await this.afterExecute(context);
+	onBlock(ctx) {
+		if (typeof super.onBlock !== "undefined") {
+			const result = super.onBlock(ctx.message, ctx.reason, ctx.blockData);
+			if (!result) {
+				if (["globalCommandPermissions", "guildCommandPermissions"].includes(ctx.reason)) {
+					const { blockData: commandPermissions } = ctx;
+					const missingPermission = commandPermissions.global.blockReason || commandPermissions.guild.blockReason;
+					if (!missingPermission) return;
+					const readableMissingPerm = this.getReadableMissingPermission(ctx, missingPermission);
+					return ctx.embed({ description: readableMissingPerm });
+				}
+			}
+			return result;
 		}
-		if (!commandPermissions.permitted) {
-			await this.didNotExecute(context, commandPermissions.blockReason);
+	}
+
+	onError(ctx) {
+		if (typeof super.onError !== "undefined") {
+			const result = super.onError(ctx.error, ctx.message, ctx.args, ctx.fromPattern);
+			return result;
+		}
+	}
+
+	onCancel(ctx) {
+		if (typeof super.onCancel !== "undefined") {
+			const result = super.onCancel(ctx.command, ctx.reason, ctx.message, ctx.collectedArgs);
+			return result;
+		}
+		if (!ctx.collectedArgs.values || (Array.isArray(ctx.collectedArgs.values) && !ctx.collectedArgs.values.length))
+			return ctx.embed({ description: "No arguments specified." });
+		else if (ctx.collectedArgs.values && ctx.collectedArgs.values.length && ctx.collectedArgs.cancelledArg) {
+			const { cancelledArg, cancelledValue } = ctx.collectedArgs;
+			let type;
+			if (cancelledArg.type.id.includes("|"))
+				type = cancelledArg.type.id.split("|").map(id => id.split("-").join(" ")).map(t => `\`${toTitleCase(t)}\``);
+			if (cancelledArg.type.id === "string" && cancelledArg.oneOf && cancelledArg.oneOf.length)
+				type = cancelledArg.oneOf.map(item => typeof item === "string" ? `\`${item}\`` : item);
+			if (!type)
+				type = cancelledArg.type.id.split("-").join(" ");
+			let cancelString = cancelledValue ? `Could not parse ${cancelledValue} as ${["a", "e", "i", "o", "u"].includes(cancelledArg.key[0]) ? "an" : "a"} ${cancelledArg.key}. ` : `No ${cancelledArg.key} specified. `;
+			if (type !== cancelledArg.key) {
+				const typeString = Array.isArray(type) ? `one of these? \n${type.join(", ")}` : `a ${type}?`;
+				cancelString += `\nDid you mean to specify ${typeString}`;
+			}
+			return ctx.embed({ description: cancelString });
 		}
 	}
 };
