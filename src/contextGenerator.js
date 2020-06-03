@@ -35,7 +35,13 @@ class Context {
 	}
 
 	get command() {
-		return this._message && this._message.command;
+		return this._command
+			|| (this._message && this._message.command)
+			|| this.newCommand;
+	}
+
+	set command(command) {
+		this._command = command;
 	}
 
 	get user() {
@@ -121,8 +127,25 @@ class Context {
 	}
 
 	get prefix() {
-		return (this.guild && this.guild.commandPrefix)
+		return this._prefix
+			|| (this.guild && this.guild.commandPrefix)
 			|| this.client.commandPrefix;
+	}
+
+	set prefix(prefix) {
+		this._prefix = prefix;
+	}
+
+	get error() {
+		return this._error;
+	}
+
+	set error(error) {
+		this._error = error;
+	}
+
+	get err() {
+		return this.error;
 	}
 
 	react(...data) {
@@ -224,6 +247,66 @@ class ContextGenerator {
 	channelUpdate(...args) {
 		const context = new Context(this.client, "channelUpdate");
 		[context.oldChannel, context.newChannel] = args;
+		return context;
+	}
+
+	commandMessage(...args) {
+		const context = new Context(this.client, "commandMessage");
+		[context.message, context.args, context.fromPattern, context.collectorResult] = args;
+		return context;
+	}
+
+	commandBlock(...args) {
+		const context = new Context(this.client, "commandBlock");
+		[context.message, context.reason, context.blockData] = args;
+		return context;
+	}
+
+	commandCancel(...args) {
+		const context = new Context(this.client, "commandCancel");
+		[context.command, context.reason, context.message, context.collectedArgs] = args;
+		return context;
+	}
+
+	commandError(...args) {
+		const context = new Context(this.client, "commandError");
+		[context.command, context.error, context.message, context.args, context.fromPattern, context.commandResult] = args;
+		return context;
+	}
+
+	commandPrefixChange(...args) {
+		const context = new Context(this.client, "commandPrefixChange");
+		[context.guild, context.prefix] = args;
+		return context;
+	}
+
+	commandRegister(...args) {
+		const context = new Context(this.client, "commandRegister");
+		[context.command, context.registry] = args;
+		return context;
+	}
+
+	commandReregister(...args) {
+		const context = new Context(this.client, "commandReregister");
+		[context.newCommand, context.oldCommand] = args;
+		return context;
+	}
+
+	commandRun(...args) {
+		const context = new Context(this.client, "commandRun");
+		[context.command, context.commandResult, context.message, context.args, context.fromPattern, context.collectedArgs] = args;
+		return context;
+	}
+
+	commandStatusChange(...args) {
+		const context = new Context(this.client, "commandStatusChange");
+		[context.guild, context.command, context.enabled] = args;
+		return context;
+	}
+
+	commandUnregister(...args) {
+		const context = new Context(this.client, "commandUnregister");
+		[context.command] = args;
 		return context;
 	}
 
@@ -332,12 +415,6 @@ class ContextGenerator {
 	guildUpdate(...args) {
 		const context = new Context(this.client, "guildUpdate");
 		[context.oldGuild, context.newGuild] = args;
-		return context;
-	}
-
-	commandMessage(...args) {
-		const context = new Context(this.client, "commandMessage");
-		[context.message, context.args, context.fromPattern] = args;
 		return context;
 	}
 

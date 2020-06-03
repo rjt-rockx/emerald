@@ -22,6 +22,16 @@ class ServiceHandler {
 			"channelDelete",
 			"channelPinsUpdate",
 			"channelUpdate",
+			"commandMessage",
+			"commandBlock",
+			"commandCancel",
+			"commandError",
+			"commandPrefixChange",
+			"commandRegister",
+			"commandReregister",
+			"commandRun",
+			"commandStatusChange",
+			"commandUnregister",
 			"debug",
 			"warn",
 			"emojiCreate",
@@ -40,7 +50,6 @@ class ServiceHandler {
 			"voiceStateUpdate",
 			"guildMemberSpeaking",
 			"guildUpdate",
-			"commandMessage",
 			"message",
 			"messageDelete",
 			"messageReactionRemoveAll",
@@ -60,6 +69,7 @@ class ServiceHandler {
 		this.timedEvents = Object.keys(this.intervals);
 		this.usedEvents = new Set();
 		this.addServicesIn("../../services");
+		this.registerUsedEvents();
 		this.registerClientEvents();
 		this.registerTimedEvents();
 		if (!this.client.serviceHandler)
