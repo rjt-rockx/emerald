@@ -1,4 +1,7 @@
 
+const { lstatSync, readdirSync } = require("fs");
+const { join, parse } = require("path");
+
 const escapeRegex = text => text.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&").replace(/-/g, "\\x2d");
 const deepProps = x => x && x !== Object.prototype && Object.getOwnPropertyNames(x).concat(deepProps(Object.getPrototypeOf(x)) || []);
 const deepFunctions = x => deepProps(x).filter(name => typeof x[name] === "function");
@@ -16,6 +19,9 @@ const camelCaseKeys = data => {
 	}
 	return newData;
 };
+const isDirectory = source => lstatSync(source).isDirectory() && !source.startsWith(".");
+const getDirectories = source => readdirSync(source).map(name => join(source, name)).filter(isDirectory).map(directory => parse(directory).name);
+
 const DiscordColors = {
 	RED: 0xF04747,
 	GREEN: 0x43B581,
@@ -39,5 +45,7 @@ module.exports = {
 	camelCaseKeys,
 	onText,
 	everyText,
+	isDirectory,
+	getDirectories,
 	DiscordColors
 };
