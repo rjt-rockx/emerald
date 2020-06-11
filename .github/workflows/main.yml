@@ -13,7 +13,7 @@ jobs:
     name: Update
     runs-on: ubuntu-18.04
     needs: [build]
-    steps: 
+    steps:
     - name: Run script on VPS
       uses: appleboy/ssh-action@master
       with:
@@ -21,6 +21,7 @@ jobs:
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
+        debug: true
         script_stop: true
         script: |
           cd ~/emerald/
