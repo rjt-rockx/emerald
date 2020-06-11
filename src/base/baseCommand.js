@@ -11,6 +11,14 @@ module.exports = class BaseCommand extends Command {
 			this.argsCollector.promptLimit = 0;
 	}
 
+	/**
+	 * Get a readable permission from a type and id
+	 * @param {Object} ctx Current context
+	 * @param {Object} permission Permission object
+	 * @param {Boolean} permission.enabled Permission state
+	 * @param {String} permission.id Permission target
+	 * @returns {String} Readable permission
+	 */
 	getReadablePermission(ctx, permission) {
 		const enabledText = permission.enabled ? "`Enabled `" : "`Disabled`";
 		const reasons = {
@@ -25,6 +33,14 @@ module.exports = class BaseCommand extends Command {
 		return reasons[permission.type](permission.id);
 	}
 
+	/**
+	 * Get a readable missing permission from a type and id
+	 * @param {Object} ctx Current context
+	 * @param {Object} missingPermission Missing permission object
+	 * @param {Boolean} missingPermission.enabled Missing permission state
+	 * @param {String} missingPermission.id Missing permission target
+	 * @returns {String} Readable missing permission
+	 */
 	getReadableMissingPermission(ctx, missingPermission) {
 		const reasons = {
 			"global": () => " as this command is disabled globally.",
@@ -38,6 +54,10 @@ module.exports = class BaseCommand extends Command {
 		return `You are not allowed use this command${reasons[missingPermission.type](missingPermission.id)}`;
 	}
 
+	/**
+	 * Listener for blocked commands
+	 * @param {Object} ctx Current context
+	 */
 	onBlock(ctx) {
 		if (typeof super.onBlock !== "undefined") {
 			const result = super.onBlock(ctx.message, ctx.reason, ctx.blockData);
@@ -54,6 +74,10 @@ module.exports = class BaseCommand extends Command {
 		}
 	}
 
+	/**
+	 * Listener for errored commands
+	 * @param {Object} ctx Current context
+	 */
 	onError(ctx) {
 		if (typeof super.onError !== "undefined") {
 			const result = super.onError(ctx.error, ctx.message, ctx.args, ctx.fromPattern);
@@ -61,6 +85,10 @@ module.exports = class BaseCommand extends Command {
 		}
 	}
 
+	/**
+	 * Listener for cancelled commands
+	 * @param {Object} ctx Current context
+	 */
 	onCancel(ctx) {
 		if (typeof super.onCancel !== "undefined") {
 			const result = super.onCancel(ctx.command, ctx.reason, ctx.message, ctx.collectedArgs);
