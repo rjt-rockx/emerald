@@ -1,4 +1,4 @@
-name: Update bot instance on VPS
+name: Deploy to VPS
 on: [push]
 jobs:
   build:
