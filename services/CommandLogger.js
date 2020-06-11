@@ -8,7 +8,7 @@ module.exports = class CommandLogger extends BaseService {
 			enabled: true
 		});
 		this.loggedEvents = {
-			commandPermissions: true,
+			commandPermissions: false,
 			commandErrors: true,
 			commandCancels: false,
 			commandPrefixChanges: false,
