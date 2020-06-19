@@ -60,9 +60,9 @@ module.exports = class BaseCommand extends Command {
 	 */
 	onBlock(ctx) {
 		if (typeof super.onBlock !== "undefined") {
-			const result = super.onBlock(ctx.message, ctx.reason, ctx.blockData);
+			const result = super.onBlock(ctx.message, ctx.blockReason, ctx.blockData);
 			if (!result) {
-				if (["globalCommandPermissions", "guildCommandPermissions"].includes(ctx.reason)) {
+				if (["globalCommandPermissions", "guildCommandPermissions"].includes(ctx.blockReason)) {
 					const { blockData: commandPermissions } = ctx;
 					const missingPermission = commandPermissions.global.blockReason || commandPermissions.guild.blockReason;
 					if (!missingPermission) return;
@@ -91,7 +91,7 @@ module.exports = class BaseCommand extends Command {
 	 */
 	onCancel(ctx) {
 		if (typeof super.onCancel !== "undefined") {
-			const result = super.onCancel(ctx.command, ctx.reason, ctx.message, ctx.collectedArgs);
+			const result = super.onCancel(ctx.command, ctx.cancelReason, ctx.message, ctx.collectedArgs);
 			return result;
 		}
 		if (!ctx.collectedArgs.values || (Array.isArray(ctx.collectedArgs.values) && !ctx.collectedArgs.values.length))

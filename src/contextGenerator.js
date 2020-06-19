@@ -54,13 +54,13 @@ class ContextGenerator {
 
 	commandBlock(...args) {
 		const context = new Context(this.client, "commandBlock");
-		[context.message, context.reason, context.blockData] = args;
+		[context.message, context.blockReason, context.blockData] = args;
 		return context;
 	}
 
 	commandCancel(...args) {
 		const context = new Context(this.client, "commandCancel");
-		[context.command, context.reason, context.message, context.collectedArgs] = args;
+		[context.command, context.cancelReason, context.message, context.collectedArgs] = args;
 		return context;
 	}
 
@@ -277,7 +277,6 @@ class ContextGenerator {
 	roleUpdate(...args) {
 		const context = new Context(this.client, "roleUpdate");
 		[context.oldRole, context.newRole] = args;
-		context.role = context.newRole;
 		return context;
 	}
 

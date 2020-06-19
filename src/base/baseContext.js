@@ -1,6 +1,7 @@
-const { MessageEmbed } = require("discord.js");
+const { MessageEmbed, SnowflakeUtil } = require("discord.js");
 const logger = require("../utilities/logger.js");
 const paginator = require("../utilities/paginator.js");
+const { idSort, byText } = require("../utilities/utilities.js");
 const dataHandler = require("../handlers/dataHandler.js");
 
 module.exports = class Context {
@@ -26,8 +27,9 @@ module.exports = class Context {
 
 	get message() {
 		return this._message
-			|| (this.reaction && this.reaction.message)
-			|| this.newMessage;
+			|| this.newMessage
+			|| (this.messages && this.messages.first())
+			|| (this.reaction && this.reaction.message);
 	}
 
 	set message(message) {
@@ -36,8 +38,8 @@ module.exports = class Context {
 
 	get command() {
 		return this._command
-			|| (this._message && this._message.command)
-			|| this.newCommand;
+			|| this.newCommand
+			|| (this._message && this._message.command);
 	}
 
 	set command(command) {
@@ -46,10 +48,10 @@ module.exports = class Context {
 
 	get user() {
 		return this._user
+			|| this.newUser
 			|| (this._member && this._member.user)
 			|| (this._message && this._message.author)
-			|| (this.invite && this.invite.inviter)
-			|| this.newUser;
+			|| (this.invite && this.invite.inviter);
 	}
 
 	set user(user) {
@@ -59,6 +61,7 @@ module.exports = class Context {
 	get member() {
 		return this._member
 			|| this.newMember
+			|| (this._message && this._message.member)
 			|| (this._guild && this._user && this._guild.members.resolve(this._user.id));
 	}
 
@@ -68,11 +71,11 @@ module.exports = class Context {
 
 	get channel() {
 		return this._channel
+			|| this.newChannel
 			|| (this._message && this._message.channel)
 			|| (this.reaction && this.reaction.message && this.reaction.message.channel)
 			|| (this._messages && this._messages.first().channel)
-			|| (this.invite && this.invite.channel)
-			|| this.newChannel;
+			|| (this.invite && this.invite.channel);
 	}
 
 	set channel(channel) {
@@ -90,6 +93,7 @@ module.exports = class Context {
 
 	get guild() {
 		return this._guild
+			|| this.newGuild
 			|| (this._message && this._message.guild)
 			|| (this._channel && this._channel.guild)
 			|| (this.emoji && this.emoji.guild)
@@ -98,8 +102,7 @@ module.exports = class Context {
 			|| (this._member && this._member.guild)
 			|| (this.newMember && this.newMember.guild)
 			|| (this._role && this._role.guild)
-			|| (this.invite && this.invite.guild)
-			|| this.newGuild;
+			|| (this.invite && this.invite.guild);
 	}
 
 	set guild(guild) {
@@ -178,7 +181,7 @@ module.exports = class Context {
 
 	embed(...data) {
 		return this.message && (
-			data[0] instanceof String
+			typeof data[0] === "string"
 				? this.message.embed({ description: data[0] })
 				: this.message.embed(...data)
 		);

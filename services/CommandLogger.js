@@ -22,7 +22,7 @@ module.exports = class CommandLogger extends BaseService {
 	}
 
 	onCommandBlock(ctx) {
-		if (["globalCommandPermissions", "guildCommandPermissions"].includes(ctx.reason) && this.loggedEvents.commandPermissions) {
+		if (["globalCommandPermissions", "guildCommandPermissions"].includes(ctx.blockReason) && this.loggedEvents.commandPermissions) {
 			const { blockData: commandPermissions } = ctx;
 			const missingPermission = commandPermissions.global.blockReason || commandPermissions.guild.blockReason;
 			if (!missingPermission) return;
