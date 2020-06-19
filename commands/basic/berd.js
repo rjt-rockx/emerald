@@ -41,9 +41,9 @@ module.exports = class Berd extends BaseCommand {
 		if (!["list", "add"].includes(ctx.args.action) && !berds.base)
 			return ctx.embed("No base berd set.");
 		if (ctx.args.action === "random" && berds.base) {
-			const randomHead = Math.random() > 0.5 && berds.head.length > 0 ? berds.head[randomNumber(berds.head.length)] : "";
-			const randomBody = Math.random() > 0.5 && berds.body.length > 0 ? berds.body[randomNumber(berds.body.length)] : "";
-			const randomAccessory = Math.random() > 0.5 && berds.accessory.length > 0 ? berds.accessory[randomNumber(berds.accessory.length)] : "";
+			const randomHead = Math.random() > 0.25 && berds.head.length > 0 ? berds.head[randomNumber(berds.head.length)] : "";
+			const randomBody = Math.random() > 0.25 && berds.body.length > 0 ? berds.body[randomNumber(berds.body.length)] : "";
+			const randomAccessory = Math.random() > 0.25 && berds.accessory.length > 0 ? berds.accessory[randomNumber(berds.accessory.length)] : "";
 
 			const combinedBuffer = await this.combineImages(berds.base, randomHead, randomBody, randomAccessory);
 			return ctx.send({
