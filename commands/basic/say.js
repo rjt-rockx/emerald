@@ -7,7 +7,6 @@ module.exports = class Say extends BaseCommand {
 			group: "basic",
 			description: "Make the bot say something.",
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
-			userPermissions: ["ADMINISTRATOR"],
 			args: [
 				{
 					key: "channel",
@@ -25,8 +24,12 @@ module.exports = class Say extends BaseCommand {
 	}
 
 	async task(ctx) {
-		if (ctx.channel.type !== "text" && ctx.channel.type !== "news")
-			return ctx.embed({ description: "Invalid channel specified." } );
-		return ctx.send(ctx.args.message);
+		if (ctx.args.channel.type !== "text" && ctx.args.channel.type !== "news")
+			return ctx.embed({ description: "Invalid channel specified." });
+		if (!ctx.args.channel.permissionsFor(ctx.client.user).has(["VIEW_CHANNEL", "SEND_MESSAGES", "READ_MESSAGE_HISTORY", "EMBED_LINKS"]))
+			return ctx.embed({ description: "The bot isn't allowed to send messages there." });
+		if (!ctx.args.channel.permissionsFor(ctx.user).has(["VIEW_CHANNEL", "SEND_MESSAGES", "READ_MESSAGE_HISTORY"]))
+			return ctx.embed({ description: "You aren't allowed to send messages there." });
+		return ctx.args.channel.send(ctx.args.message);
 	}
 };
