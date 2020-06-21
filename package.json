@@ -1,6 +1,6 @@
 {
 	"name": "emerald",
-	"version": "1.6.1",
+	"version": "1.6.2",
 	"description": "A simple Discord bot built with Discord.js and Commando.",
 	"main": "index.js",
 	"scripts": {
@@ -9,7 +9,7 @@
 	"author": "rjt",
 	"license": "MIT",
 	"dependencies": {
-		"@google-cloud/storage": "^5.0.1",
+		"@google-cloud/storage": "^5.1.1",
 		"chalk": "^4.1.0",
 		"discord.js": "^12.2.0",
 		"discord.js-commando": "github:discordjs/Commando",
