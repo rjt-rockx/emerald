@@ -30,44 +30,43 @@ module.exports = class ApplicationChannel extends BaseCommand {
 		const applicationChannelID = ctx.guildStorage.get("applicationChannel");
 		const applicationChannel = ctx.guild.channels.cache.get(applicationChannelID);
 		const requiredPermissions = ["SEND_MESSAGES", "ATTACH_FILES", "EMBED_LINKS", "ADD_REACTIONS"];
-		if (ctx.args.action === "get" && !applicationChannelID) {
-			ctx.embed({ description: "No application channel set for this guild." });
-		}
+		if (ctx.args.action === "get" && !applicationChannelID)
+			return ctx.embed({ description: "No application channel set for this guild." });
 		else if (ctx.args.action === "get" && applicationChannelID) {
 			if (!applicationChannel) {
-				ctx.embed({ description: "Application channel does not exist, removing." });
 				ctx.guildStorage.delete("applicationChannel");
+				return ctx.embed({ description: "Application channel does not exist, removing." });
 			}
 			else if (applicationChannel && !applicationChannel.permissionsFor(ctx.client.user).has(requiredPermissions)) {
-				ctx.embed({ description: "Bot has insufficient permissions in the current application channel, removing." });
 				ctx.guildStorage.delete("applicationChannel");
+				return ctx.embed({ description: "Bot has insufficient permissions in the current application channel, removing." });
 			}
-			else ctx.embed({ description: `Application channel currently set to ${applicationChannel}.` });
+			else return ctx.embed({ description: `Application channel currently set to ${applicationChannel}.` });
 		}
 		else if (ctx.args.action === "set") {
 			if (!ctx.args.channel || ctx.args.channel.type !== "text")
-				ctx.embed({ description: "Invalid channel specified." });
+				return ctx.embed({ description: "Invalid channel specified." });
 			else if (ctx.args.channel && applicationChannelID === ctx.args.channel.id) {
 				if (applicationChannel && !applicationChannel.permissionsFor(ctx.client.user).has(requiredPermissions)) {
-					ctx.embed({ description: "Bot has insufficient permissions in the given application channel, removing." });
 					ctx.guildStorage.delete("applicationChannel");
+					return ctx.embed({ description: "Bot has insufficient permissions in the given application channel, removing." });
 				}
-				else ctx.embed({ description: `Application channel already set to ${ctx.args.channel}.` });
+				else return ctx.embed({ description: `Application channel already set to ${ctx.args.channel}.` });
 			}
 			else if (ctx.args.channel && applicationChannelID !== ctx.args.channel.id) {
 				if (!ctx.args.channel.permissionsFor(ctx.client.user).has(requiredPermissions)) {
-					ctx.embed({ description: "Bot has insufficient permissions in the given application channel, removing." });
 					ctx.guildStorage.delete("applicationChannel");
+					return ctx.embed({ description: "Bot has insufficient permissions in the given application channel, removing." });
 				}
 				else {
 					ctx.guildStorage.set("applicationChannel", ctx.args.channel.id);
-					ctx.embed({ description: `Application channel successfully set to ${ctx.args.channel}.` });
+					return ctx.embed({ description: `Application channel successfully set to ${ctx.args.channel}.` });
 				}
 			}
 		}
 		else if (ctx.args.action === "remove") {
 			ctx.guildStorage.delete("applicationChannel");
-			ctx.embed({ description: "Application channel successfully removed." });
+			return ctx.embed({ description: "Application channel successfully removed." });
 		}
 	}
 };

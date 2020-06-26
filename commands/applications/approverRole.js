@@ -32,20 +32,20 @@ module.exports = class ApproverRole extends BaseCommand {
 			if (!(ctx.args.role instanceof Role))
 				return ctx.embed({ description: "Invalid role specified." });
 			ctx.guildStorage.set("approverRole", ctx.args.role.id);
-			ctx.embed({ description: `Approver role successfully set to ${ctx.args.role.name}.` });
+			return ctx.embed({ description: `Approver role successfully set to ${ctx.args.role.name}.` });
 		}
 		else if (ctx.args.action === "get") {
 			if (!approverRole)
-				ctx.embed({ description: "No approver role set." });
+				return ctx.embed({ description: "No approver role set." });
 			else if (!(await ctx.guild.roles.fetch(approverRole).catch(() => {}))) {
 				ctx.guildStorage.delete("approverRole");
-				ctx.embed({ description: "Approver role not found." });
+				return ctx.embed({ description: "Approver role not found." });
 			}
-			else ctx.embed({ description: `Approver role currently set to ${ctx.guild.roles.cache.get(approverRole).name}.` });
+			else return ctx.embed({ description: `Approver role currently set to ${ctx.guild.roles.cache.get(approverRole).name}.` });
 		}
 		else if (ctx.args.action === "remove") {
 			ctx.guildStorage.delete("approverRole");
-			ctx.embed({ description: "Approver role successfully removed." });
+			return ctx.embed({ description: "Approver role successfully removed." });
 		}
 	}
 };
