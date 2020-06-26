@@ -7,7 +7,7 @@ module.exports = class ApproverRole extends BaseCommand {
 			name: "approverrole",
 			description: "Get, set or remove an approver role. Applications can only be approved by people with this role.",
 			group: "applications",
-			userPermissions: ["ADMINISTRATOR"],
+			userPermissions: ["MANAGE_ROLES"],
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
 			args: [
 				{

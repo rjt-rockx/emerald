@@ -8,7 +8,7 @@ module.exports = class RemovePerm extends BaseCommand {
 			aliases: ["removeperms", "removecmdperm", "removecmdpermission", "removecommandpermission", "remcmdperm", "remcmdpermission", "remcommandpermission", "removecommandperm"],
 			description: "Remove a command's permission.",
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
-			userPermissions: ["ADMINISTRATOR"],
+			userPermissions: ["MANAGE_GUILD"],
 			guarded: true,
 			args: [
 				{

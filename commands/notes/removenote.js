@@ -7,7 +7,7 @@ module.exports = class RemoveNote extends BaseCommand {
 			group: "notes",
 			description: "Remove a note from a specified user.",
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
-			userPermissions: ["ADMINISTRATOR"],
+			userPermissions: ["MANAGE_MESSAGES"],
 			args: [
 				{
 					key: "user",

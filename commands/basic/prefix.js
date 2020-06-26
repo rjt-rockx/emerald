@@ -7,7 +7,7 @@ module.exports = class Prefix extends BaseCommand {
 			group: "basic",
 			description: "Get or set the prefix for this guild.",
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
-			userPermissions: ["ADMINISTRATOR"],
+			userPermissions: ["MANAGE_GUILD"],
 			args: [
 				{
 					key: "prefix",

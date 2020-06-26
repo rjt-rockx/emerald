@@ -7,7 +7,7 @@ module.exports = class ListNotes extends BaseCommand {
 			group: "notes",
 			description: "List all notes on a specified user.",
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
-			userPermissions: ["ADMINISTRATOR"],
+			userPermissions: ["MANAGE_MESSAGES"],
 			args: [
 				{
 					key: "user",

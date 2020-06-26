@@ -7,7 +7,7 @@ module.exports = class AddNote extends BaseCommand {
 			group: "notes",
 			description: "Add a note for a specified user.",
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
-			userPermissions: ["ADMINISTRATOR"],
+			userPermissions: ["MANAGE_MESSAGES"],
 			args: [
 				{
 					key: "user",

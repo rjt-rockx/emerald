@@ -7,7 +7,7 @@ module.exports = class AttachmentLog extends BaseCommand {
 			name: "attachmentlog",
 			description: "Enable or disable attachment logging in a particular channel.",
 			group: "logs",
-			userPermissions: ["ADMINISTRATOR"],
+			userPermissions: ["MANAGE_CHANNELS", "MANAGE_GUILD"],
 			clientPermissions: ["VIEW_CHANNEL", "SEND_MESSAGES", "ATTACH_FILES", "EMBED_LINKS"],
 			args: [
 				{

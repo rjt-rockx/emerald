@@ -25,7 +25,7 @@ module.exports = class BotClear extends BaseCommand {
 				"READ_MESSAGE_HISTORY",
 				"MANAGE_MESSAGES"
 			],
-			userPermissions: ["ADMINISTRATOR"]
+			userPermissions: ["MANAGE_MESSAGES"]
 		});
 	}
 

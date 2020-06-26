@@ -7,7 +7,7 @@ module.exports = class ReactionLog extends BaseCommand {
 			name: "reactionlog",
 			description: "Enable or disable reaction logging in a particular channel.",
 			group: "logs",
-			userPermissions: ["ADMINISTRATOR"],
+			userPermissions: ["MANAGE_CHANNELS", "MANAGE_GUILD"],
 			clientPermissions: ["VIEW_CHANNEL", "SEND_MESSAGES", "EMBED_LINKS"],
 			args: [
 				{
