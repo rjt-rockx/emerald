@@ -4,7 +4,9 @@
 	"description": "A simple Discord bot built with Discord.js and Commando.",
 	"main": "index.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"lint": "eslint ./",
+		"start": "node ./index.js"
 	},
 	"author": "rjt",
 	"license": "MIT",
