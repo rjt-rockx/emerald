@@ -1,6 +1,6 @@
 {
 	"name": "emerald",
-	"version": "1.6.2",
+	"version": "1.6.3",
 	"description": "A simple Discord bot built with Discord.js and Commando.",
 	"main": "index.js",
 	"scripts": {
