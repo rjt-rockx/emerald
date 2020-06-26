@@ -45,13 +45,13 @@ module.exports = class CommandLogger extends BaseService {
 	onCommandRun(ctx) {
 		if (!this.loggedEvents.commandRuns) return;
 		const { cyan, green, gray } = ctx.logger.chalk;
-		ctx.logger.info(`Command ${cyan(ctx.command.name)} was ${green("executed")} by user ${ctx.user.tag} ${gray(`(${ctx.user.id})`)}.`);
+		ctx.logger.info(`Command ${cyan(ctx.command.name)} was ${green("executed")} by user ${ctx.user.tag} ${gray(`(${ctx.user.id})`)}`);
 	}
 
 	onCommandError(ctx) {
 		if (!this.loggedEvents.commandErrors) return;
 		const { cyan, yellow, gray } = ctx.logger.chalk;
-		ctx.logger.error(`Command ${cyan(ctx.command.name)} ${yellow("did not execute")} for user ${ctx.user.tag} ${gray(`(${ctx.user.id})`)}.`);
+		ctx.logger.error(`Command ${cyan(ctx.command.name)} ${yellow("did not execute")} for user ${ctx.user.tag} ${gray(`(${ctx.user.id})`)}`);
 		ctx.logger.error(`${ctx.error.stack}`);
 	}
 
