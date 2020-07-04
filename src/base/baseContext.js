@@ -50,6 +50,7 @@ module.exports = class Context {
 		return this._user
 			|| this.newUser
 			|| (this._member && this._member.user)
+			|| (this.newMember && this.newMember.user)
 			|| (this._message && this._message.author)
 			|| (this.invite && this.invite.inviter);
 	}
@@ -74,7 +75,7 @@ module.exports = class Context {
 			|| this.newChannel
 			|| (this._message && this._message.channel)
 			|| (this.reaction && this.reaction.message && this.reaction.message.channel)
-			|| (this._messages && this._messages.first().channel)
+			|| (this.messages && this.messages.first().channel)
 			|| (this.invite && this.invite.channel);
 	}
 
@@ -95,7 +96,9 @@ module.exports = class Context {
 		return this._guild
 			|| this.newGuild
 			|| (this._message && this._message.guild)
+			|| (this.messages && this.messages.first() && this.messages.first().guild)
 			|| (this._channel && this._channel.guild)
+			|| (this.newChannel && this.newChannel.guild)
 			|| (this.emoji && this.emoji.guild)
 			|| (this.reaction && this.reaction.message && this.reaction.message.guild)
 			|| (this.newEmoji && this.newEmoji.guild)
