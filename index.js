@@ -42,7 +42,3 @@ client.once("ready", async () => {
 client.on("error", err => logger.error(err));
 
 client.login(config.token);
-
-process.on("SIGINT", () => {
-	client.destroy();
-});
