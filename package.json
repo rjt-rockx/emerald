@@ -17,6 +17,7 @@
 		"discord.js-commando": "github:discordjs/Commando",
 		"got": "^11.3.0",
 		"jimp": "^0.13.0",
+		"node-vibrant": "^3.1.5",
 		"quick.db": "^7.1.1"
 	},
 	"devDependencies": {},
