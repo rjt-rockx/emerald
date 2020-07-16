@@ -34,7 +34,7 @@ module.exports = class AttachmentLog extends BaseCommand {
 				if (ctx.guild.channels.cache.has(logChannel)) {
 					const perms = ctx.client.channels.cache.get(logChannel).permissionsFor(ctx.client.user);
 					if (!perms || !perms.has(["VIEW_CHANNEL", "SEND_MESSAGES", "ATTACH_FILES", "EMBED_LINKS"])) {
-						logChannel = ctx.guildStorage.set("attachmentLogChannel", null);
+						logChannel = ctx.guildStorage.set("attachmentLogChannel", "");
 						return ctx.embed({ description: "Invalid permissions." });
 					}
 					return ctx.embed({ description: `Attachment log channel successfully set to #${ctx.guild.channels.cache.get(logChannel).name}.` });
@@ -43,7 +43,7 @@ module.exports = class AttachmentLog extends BaseCommand {
 			else if ((ctx.args.channel instanceof TextChannel) && ctx.guild.channels.cache.has(ctx.args.channel.id)) {
 				const perms = ctx.args.channel.permissionsFor(ctx.client.user);
 				if (!perms || !perms.has(["VIEW_CHANNEL", "SEND_MESSAGES", "ATTACH_FILES", "EMBED_LINKS"])) {
-					logChannel = ctx.guildStorage.set("attachmentLogChannel", null);
+					logChannel = ctx.guildStorage.set("attachmentLogChannel", "");
 					return ctx.embed({ description: "Invalid permissions." });
 				}
 				ctx.guildStorage.set("attachmentLogChannel", logChannel = ctx.args.channel.id);
@@ -51,7 +51,7 @@ module.exports = class AttachmentLog extends BaseCommand {
 			}
 		}
 		else if (ctx.args.enabled === "disable") {
-			logChannel = ctx.guildStorage.set("attachmentLogChannel", null);
+			logChannel = ctx.guildStorage.set("attachmentLogChannel", "");
 			return ctx.embed({ description: "Attachment log channel successfully disabled." });
 		}
 	}
