@@ -1,6 +1,8 @@
 const { MessageEmbed } = require("discord.js");
 const BaseService = require("../src/base/baseService.js");
 
+// Latest Twemoji licensed by Twitter under CC-BY 4.0
+
 module.exports = class ReactionLog extends BaseService {
 	constructor(client) {
 		super(client, {
@@ -17,7 +19,28 @@ module.exports = class ReactionLog extends BaseService {
 				return `https://cdn.discordapp.com/emojis/${emoji.id}.gif`;
 			return `https://cdn.discordapp.com/emojis/${emoji.id}.png`;
 		}
-		return `https://raw.githack.com/twitter/twemoji/v12.1.6/assets/72x72/${emoji.name.codePointAt(0).toString(16)}.png`;
+		return `https://twemoji.maxcdn.com/v/latest/72x72/${this.getIconID(emoji.name)}.png`;
+	}
+
+	getIconID(name) {
+		return this.toCodePoint(name.indexOf(String.fromCharCode(0x200D)) < 0 ? name.replace(/\uFE0F/g, "") : name);
+	}
+
+	toCodePoint(unicodeSurrogates, sep) {
+		const r = [];
+		let c = 0,
+			p = 0,
+			i = 0;
+		while (i < unicodeSurrogates.length) {
+			c = unicodeSurrogates.charCodeAt(i++);
+			if (p) {
+				r.push((0x10000 + ((p - 0xD800) << 10) + (c - 0xDC00)).toString(16));
+				p = 0;
+			}
+			else if (0xD800 <= c && c <= 0xDBFF) { p = c; }
+			else { r.push(c.toString(16)); }
+		}
+		return r.join(sep || "-");
 	}
 
 	async onMessageReactionAdd(ctx) {
