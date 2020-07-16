@@ -25,6 +25,10 @@ module.exports = class Context {
 		return this;
 	}
 
+	get services() {
+		return this.client.services;
+	}
+
 	get message() {
 		return this._message
 			|| this.newMessage
@@ -118,6 +122,10 @@ module.exports = class Context {
 
 	get guildStorage() {
 		return this.guild && dataHandler.getGuildStorage(this.guild.id);
+	}
+
+	getGuildStorage(guildID) {
+		return dataHandler.getGuildStorage(guildID);
 	}
 
 	get bot() {
