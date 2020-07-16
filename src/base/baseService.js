@@ -21,9 +21,11 @@ module.exports = class baseService {
 
 	enable() {
 		this.enabled = true;
+		return this;
 	}
 
 	disable() {
 		this.enabled = false;
+		return this;
 	}
 };
