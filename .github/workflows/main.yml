@@ -27,4 +27,4 @@ jobs:
           pm2 stop emerald
           git pull
           npm i
-          pm2 start emerald
+          pm2 start index.js --name emerald
