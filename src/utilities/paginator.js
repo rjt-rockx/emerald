@@ -9,6 +9,7 @@ module.exports = class Paginator {
 		this.next = "▶";
 		this.stop = "⏹";
 		this.user = user;
+		this.channel = channel;
 		this.fields = fields;
 		if (!options) options = {};
 		this.timeout = options.timeout && Number.isSafeInteger(options.timeout) && options.timeout <= 300 && options.timeout > 0 ? options.timeout : 15;
@@ -19,53 +20,70 @@ module.exports = class Paginator {
 		if (typeof options.chunkSize !== "number" || options.chunkSize < 1 || options.chunkSize > 12)
 			options.chunkSize = 5;
 		if (typeof options.defaultPage !== "number" || !(options.defaultPage >= 0 && options.defaultPage <= fields.length))
-			options.defaultPage = 0;
-		this.current = options.defaultPage;
+			options.defaultPage = 1;
+		this.current = options.defaultPage - 1;
 		this.fields = chunk(this.fields, options.chunkSize);
 		this.total = this.fields.length;
 		this.embedTemplate = typeof options.embedTemplate === "object" ? options.embedTemplate : {};
+	}
 
-		channel.send(new MessageEmbed({
+	async initialize() {
+		this.message = await this.channel.send(new MessageEmbed({
 			...this.embedTemplate,
 			fields: this.fields[this.current],
 			footer: this.footer
-		})).then(async msg => {
-			this.message = msg;
-			if (this.message.partial) await this.message.fetch().catch(() => { });
-			if (this.total < 2) return;
-			await this.message.react(this.back);
-			await this.message.react(this.next);
-			if (this.total > 2) await this.message.react(this.stop);
-			this.collector = this.message.createReactionCollector((reaction, user) => reaction.me && user.id === this.user.id && user.id !== this.message.author.id, { time: this.timeout * 1000 });
+		}));
+		if (this.message.partial)
+			await this.message.fetch().catch(() => { });
+		if (this.total < 2)
+			return;
 
-			const paginate = async reaction => {
-				if (reaction.partial) await reaction.fetch().catch(() => { });
-				switch (reaction.emoji.toString()) {
-					case this.back: {
-						this.current--;
-						if (this.current < 0) this.current = this.total - 1;
-						reaction.users.remove(user).catch(() => { });
-						break;
-					}
-					case this.next: {
-						this.current++;
-						if (this.current > this.total - 1) this.current = 0;
-						reaction.users.remove(user).catch(() => { });
-						break;
-					}
-					case this.stop: {
-						this.collector.stop();
-						break;
-					}
+		await this.message.react(this.back);
+		await this.message.react(this.next);
+
+		if (this.total > 2)
+			await this.message.react(this.stop);
+		this.collector = this.message.createReactionCollector((reaction, user) =>
+			reaction.me && user.id === this.user.id && user.id !== this.message.author.id, { time: this.timeout * 1000 });
+
+		const paginate = async reaction => {
+			if (reaction.partial)
+				await reaction.fetch().catch(() => { });
+			switch (reaction.emoji.toString()) {
+				case this.back: {
+					this.current--;
+					if (this.current < 0) this.current = this.total - 1;
+					reaction.users.remove(this.user).catch(() => { });
+					break;
 				}
-				this.refresh();
-			};
+				case this.next: {
+					this.current++;
+					if (this.current > this.total - 1) this.current = 0;
+					reaction.users.remove(this.user).catch(() => { });
+					break;
+				}
+				case this.stop: {
+					this.collector.stop();
+					break;
+				}
+			}
+			return this.refresh();
+		};
 
-			this.collector.on("collect", paginate);
-			this.collector.on("remove", paginate);
+		this.collector.on("collect", paginate);
+		this.collector.on("remove", paginate);
 
-			this.collector.on("end", () => this.message.reactions.removeAll().catch(() => { }));
-		});
+		this.collector.on("end", () => this.message.reactions.removeAll().catch(() => { }));
+
+		this.isInitialized = true;
+		return this;
+	}
+
+	async setPage(page) {
+		if (typeof page !== "number" || page < 1 || page > this.total) return;
+		if (!this.isInitialized) await this.initialize();
+		this.current = page - 1;
+		return this.refresh();
 	}
 
 	splitText(text, { maxLength = 2000, characters = ["\n", " "], prepend = "", append = "" }) {
@@ -118,9 +136,10 @@ module.exports = class Paginator {
 		return newFields;
 	}
 
-	refresh() {
-		this.message.edit(new MessageEmbed({ ...this.embedTemplate, fields: this.fields[this.current], footer: this.footer }));
+	async refresh() {
+		await this.message.edit(new MessageEmbed({ ...this.embedTemplate, fields: this.fields[this.current], footer: this.footer }));
 		this.collector.resetTimer({ idle: this.timeout * 1000 });
+		return this;
 	}
 
 	get footer() {

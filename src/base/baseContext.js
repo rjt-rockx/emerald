@@ -11,7 +11,7 @@ module.exports = class Context {
 		this.emittedAt = new Date();
 		this.logger = logger;
 		this.paginator = paginator;
-		this.paginate = (...data) => new this.paginator(this, ...data);
+		this.paginate = (...data) => new this.paginator(this, ...data).initialize();
 		this.partialErrorHandler = () => { };
 	}
 
