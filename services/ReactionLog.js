@@ -55,6 +55,7 @@ module.exports = class ReactionLog extends BaseService {
 		if (errorReported) return;
 
 		const logChannel = ctx.guildStorage.get("reactionLogChannel");
+		if (!logChannel) return;
 		const url = this.resolveURL(ctx.reaction.emoji);
 		if (this.client.channels.cache.has(logChannel)) {
 			this.client.channels.cache.get(logChannel).send(new MessageEmbed({
@@ -106,6 +107,7 @@ module.exports = class ReactionLog extends BaseService {
 		if (errorReported) return;
 
 		const logChannel = ctx.guildStorage.get("reactionLogChannel");
+		if (!logChannel) return;
 		const url = this.resolveURL(ctx.reaction.emoji);
 		if (this.client.channels.cache.has(logChannel)) {
 			this.client.channels.cache.get(logChannel).send(new MessageEmbed({
@@ -155,6 +157,7 @@ module.exports = class ReactionLog extends BaseService {
 		if (errorReported) return;
 
 		const logChannel = ctx.guildStorage.get("reactionLogChannel");
+		if (!logChannel) return;
 		const url = this.resolveURL(ctx.reaction.emoji);
 		if (this.client.channels.cache.has(logChannel)) {
 			this.client.channels.cache.get(logChannel).send(new MessageEmbed({
