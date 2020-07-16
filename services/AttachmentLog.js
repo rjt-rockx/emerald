@@ -5,7 +5,7 @@ const { properRoundToTwo } = require("../src/utilities/utilities.js");
 module.exports = class AttachmentLog extends BaseService {
 	constructor(client) {
 		super(client, {
-			name: "Attachment Logging Service",
+			name: "Attachment Log Service",
 			description: "Fetches and reuploads attachments sent in the server to a particular channel.",
 			enabled: true
 		});

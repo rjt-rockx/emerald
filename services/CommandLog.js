@@ -1,9 +1,9 @@
 const BaseService = require("../src/base/baseService.js");
 
-module.exports = class CommandLogger extends BaseService {
+module.exports = class CommandLog extends BaseService {
 	constructor(client) {
 		super(client, {
-			name: "Command Logger Service",
+			name: "Command Log Service",
 			description: "Logs command-related events.",
 			enabled: true
 		});
