@@ -8,7 +8,7 @@ module.exports = class baseService {
 	}
 
 	get id() {
-		return this.constructor.name;
+		return this.constructor.name.toLowerCase();
 	}
 
 	get name() {
