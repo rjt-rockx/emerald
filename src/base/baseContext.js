@@ -124,8 +124,12 @@ module.exports = class Context {
 		return this.client.user;
 	}
 
+	get me() {
+		return this.guild && this.guild.me;
+	}
+
 	get botMember() {
-		return this.guild && this.guild.members.resolve(this.bot);
+		return this.guild && this.guild.me;
 	}
 
 	get msg() {
