@@ -5,6 +5,7 @@ module.exports = class baseService {
 		this._description = serviceInfo.description ? serviceInfo.description : "No description specified.";
 		this.enabled = typeof serviceInfo.enabled === "boolean" ? serviceInfo.enabled : true;
 		this.fetchPartials = !!serviceInfo.fetchPartials;
+		this.guildOnly = !!serviceInfo.guildOnly;
 	}
 
 	get id() {
