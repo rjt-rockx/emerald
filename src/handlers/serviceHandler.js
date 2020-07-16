@@ -7,7 +7,7 @@ const BaseService = require("../base/baseService.js");
 class ServiceHandler {
 	async initialize(client) {
 		this.client = client;
-		this.services = [];
+		this.services = {};
 		this.intervals = {
 			minute: 60,
 			fiveMinutes: 300,
@@ -75,7 +75,7 @@ class ServiceHandler {
 		if (!this.client.serviceHandler)
 			this.client.serviceHandler = this;
 		this.client.services = this.services;
-		return this.services;
+		return Object.values(this.services);
 	}
 
 	checkIfValid(service) {
@@ -85,8 +85,8 @@ class ServiceHandler {
 	addService(service) {
 		if (!this.checkIfValid(service)) return;
 		const serviceToAdd = new service(this.client);
-		if (this.services.some(existingService => existingService.id === serviceToAdd.id)) return;
-		this.services.push(serviceToAdd);
+		if (Object.keys(this.services).includes(serviceToAdd.id)) return;
+		this.services[serviceToAdd.id] = serviceToAdd;
 	}
 
 	addServicesIn(folder) {
@@ -99,11 +99,11 @@ class ServiceHandler {
 	}
 
 	listServices() {
-		return this.services.map(({ id, name, description, enabled }) => ({ id, name, description, enabled }));
+		return Object.values(this.services).map(({ id, name, description, enabled }) => ({ id, name, description, enabled }));
 	}
 
 	getService(id) {
-		return this.services.find(service => service.id === id);
+		return this.services[id];
 	}
 
 	getServiceEvents(id) {
@@ -113,49 +113,46 @@ class ServiceHandler {
 	}
 
 	enableService(id) {
-		for (const service of this.services)
-			if (service.id === id && !service.enabled)
-				service.enable();
+		const service = this.services[id];
+		if (this.checkIfValid(service))
+			service.enable();
 	}
 
 	disableService(id) {
-		for (const service of this.services)
-			if (service.id === id && service.enabled)
-				service.disable();
+		const service = this.services[id];
+		if (this.checkIfValid(service))
+			service.disable();
 	}
 
-	removeService(service) {
-		this.services = this.services.filter(existingService => existingService.id !== service.id);
+	removeService(id) {
+		delete this.services[id];
 	}
 
 	removeAllServices() {
-		this.services = [];
+		this.services = {};
 	}
 
 	async runClientEvent(event, args) {
 		const context = this.client.contextGenerator[event](...args);
-		this.services
+		return Promise.all(Object.values(this.services)
 			.filter(service => typeof service[onText(event)] === "function" && service.enabled)
-			.forEach(service => {
+			.map(service => {
+				if (service.guildOnly && !context.guild) return;
 				if (service.fetchPartials)
 					return context.fetchPartials().then(ctx => service[onText(event)](ctx));
 				return Promise.resolve(service[onText(event)](context));
-			});
+			}));
 	}
 
 	async runTimedEvent(event, args) {
 		const context = this.client.contextGenerator.timedEvent(...args);
-		this.services
+		return Promise.all(Object.values(this.services)
 			.filter(service => typeof service[everyText(event)] === "function" && service.enabled)
-			.forEach(service => {
-				if (service.fetchPartials)
-					return context.fetchPartials().then(ctx => service[everyText(event)](ctx));
-				return Promise.resolve(service[everyText(event)](context));
-			});
+			.map(service => Promise.resolve(service[everyText(event)](context))));
 	}
 
 	registerUsedEvents() {
-		this.services.reduce((events, service) => events.concat(userFunctions(service)), [])
+		Object.values(this.services).reduce((events, service) => events.concat(userFunctions(service)), [])
 			.filter(eventName => eventName.startsWith("on") || eventName.startsWith("every"))
 			.forEach(event => this.usedEvents.add(event));
 	}
