@@ -404,11 +404,9 @@ module.exports = class Context {
 	}
 
 	embed(...data) {
-		return this.message && (
-			typeof data[0] === "string"
-				? this.message.embed({ description: data[0] })
-				: this.message.embed(...data)
-		);
+		if (typeof data[0] === "string")
+			return this.message ? this.message.embed({ description: data[0] }) : this.channel.send(new MessageEmbed({ description: data[0] }));
+		return this.message ? this.message.embed(...data) : this.channel.send(new MessageEmbed(...data));
 	}
 
 	dm(...data) {
@@ -417,7 +415,7 @@ module.exports = class Context {
 
 	dmEmbed(...data) {
 		return this.user && (
-			data[0] instanceof String
+			typeof data[0] === "string"
 				? this.user.send(new MessageEmbed({ description: data[0] }))
 				: this.user.send(...data)
 		);
