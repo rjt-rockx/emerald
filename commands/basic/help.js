@@ -9,6 +9,7 @@ module.exports = class Help extends BaseCommand {
 			group: "basic",
 			description: "Get help for a specific command or for all commands.",
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+			aliases: ["h"],
 			guarded: true,
 			args: [
 				{
