@@ -12,6 +12,12 @@ module.exports = class RoleSync extends BaseService {
 		});
 	}
 
+	async updateRole(role, user) {
+		const avatarURL = user.displayAvatarURL({ format: "png", size: 256, dynamic: false });
+		const color = await this.fetchColorFromImage(avatarURL);
+		await role.setColor(color.vibrant, `Sync role color to ${user.tag}'s avatar`);
+	}
+
 	async onUserUpdate(ctx) {
 		const diffedUser = diff(ctx.oldUser, ctx.newUser);
 		if (diffedUser.avatar) {
@@ -26,9 +32,7 @@ module.exports = class RoleSync extends BaseService {
 				const role = guild.roles.cache.get(roleID);
 				if (!role.editable)
 					continue;
-				const avatarURL = ctx.newUser.displayAvatarURL({ format: "png", size: 512, dynamic: false });
-				const color = await this.fetchColorFromImage(avatarURL);
-				await role.setColor(color.vibrant, `Sync role color to ${ctx.newUser.tag}'s avatar`);
+				await this.updateRole(role, ctx.newUser);
 			}
 		}
 	}
