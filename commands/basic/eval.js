@@ -1,5 +1,6 @@
 const { inspect } = require("util"), Discord = require("discord.js"), Commando = require("discord.js-commando");
-const { escapeRegex, deepProps, deepFunctions, userFunctions } = require("../../src/utilities/utilities.js");
+const Utilities = require("../../src/utilities/utilities.js");
+const { escapeRegex, deepProps, deepFunctions, userFunctions } = Utilities;
 const BaseCommand = require("../../src/base/baseCommand.js");
 
 module.exports = class Eval extends BaseCommand {
