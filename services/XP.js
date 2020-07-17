@@ -13,23 +13,39 @@ module.exports = class XP extends BaseService {
 			messageConsidered: "first",
 			minuteInterval: 1,
 			maxCharCount: 256,
-			multiplier: 1,
+			globalMultiplier: 1,
 			enabled: false
 		};
+		this.lastKnownChannel = {};
 	}
 
 	getOrInitializeGuild(ctx) {
 		if (!this.guilds[ctx.guild.id])
 			this.guilds[ctx.guild.id] = { xp: {}, counter: 0, guildStorage: ctx.guildStorage };
-		return this.updateXpOptions(ctx.guild.id, ctx.guildStorage.get("xpOptions") || ctx.guildStorage.set("xpOptions", {}));
+		const xpOptions = ctx.guildStorage.get("xpOptions") || ctx.guildStorage.set("xpOptions", {});
+		this.guilds[ctx.guild.id].xpOptions = this.validateXpOptions(xpOptions) || this.defaultXpOptions;
+		return this.guilds[ctx.guild.id];
 	}
 
 	updateXpOptions(id, xpOptions) {
-		this.guilds[id].xpOptions = { ...this.defaultXpOptions };
+		const validatedOptions = this.validateXpOptions(xpOptions);
+		this.guilds[id].xpOptions = validatedOptions || this.defaultXpOptions;
+		return validatedOptions;
+	}
+
+	validateXpOptions(xpOptions) {
 		for (const key of Object.keys(xpOptions))
-			if (typeof this.defaultXpOptions[key] === typeof xpOptions[key])
-				this.guilds[id].xpOptions[key] = xpOptions[key];
-		return this.guilds[id];
+			if (typeof this.defaultXpOptions[key] !== typeof xpOptions[key] || !Object.keys(this.defaultXpOptions).includes(key))
+				return;
+		if (!["first", "longest", "average"].includes(xpOptions.messageConsidered))
+			return;
+		if (!Number.isSafeInteger(xpOptions.globalMultiplier) || xpOptions.globalMultiplier > 10 || xpOptions.globalMultiplier < 0)
+			return;
+		if (!Number.isSafeInteger(xpOptions.maxCharCount) || xpOptions.maxCharCount > 2000 || xpOptions.maxCharCount < 0)
+			return;
+		if (!Number.isSafeInteger(xpOptions.minuteInterval) || xpOptions.minuteInterval > 60 || xpOptions.minuteInterval < 1)
+			return;
+		return Object.keys(this.defaultXpOptions).reduce((key, obj) => { obj[key] = xpOptions[key]; return obj; }, this.defaultXpOptions);
 	}
 
 	onMessage(ctx) {
@@ -58,9 +74,25 @@ module.exports = class XP extends BaseService {
 		}
 		else if (typeof xp[ctx.user.id] !== "number")
 			xp[ctx.user.id] = characterCount;
+
+		this.setLastKnownChannelID(ctx.guild.id, ctx.user.id, ctx.channel.id);
 	}
 
-	everyMinute() {
+	getLastKnownChannelID(guildID, userID) {
+		if (!this.lastKnownChannel[guildID])
+			this.lastKnownChannel[guildID] = {};
+		if (!this.lastKnownChannel[guildID][userID]) return;
+		return this.lastKnownChannel[guildID][userID];
+	}
+
+	setLastKnownChannelID(guildID, userID, channelID) {
+		if (!this.lastKnownChannel[guildID])
+			this.lastKnownChannel[guildID] = {};
+		this.lastKnownChannel[guildID][userID] = channelID;
+		return this.lastKnownChannel;
+	}
+
+	everyMinute(ctx) {
 		for (const id of Object.keys(this.guilds)) {
 			const { xp, guildStorage, xpOptions } = this.guilds[id];
 			if (!xpOptions.enabled)
@@ -70,19 +102,33 @@ module.exports = class XP extends BaseService {
 			if (this.guilds[id].counter !== +xpOptions.minuteInterval)
 				continue;
 
-			const multiplier = typeof xpOptions.multiplier === "number" && xpOptions.multiplier > 0 ? xpOptions.multiplier : 1;
 			const xpData = guildStorage.get("xp") || guildStorage.set("xp", {});
 
 			for (const [userID, xpToAdd] of Object.entries(xp)) {
 				if (typeof xpData[userID] !== "number")
 					xpData[userID] = 0;
-				xpData[userID] += xpToAdd * multiplier;
+				const oldXpInfo = this.getXPData(id, userID, xpData);
+				xpData[userID] += xpToAdd * xpOptions.globalMultiplier;
+				const newXpInfo = this.getXPData(id, userID, xpData);
+
+				if (oldXpInfo.level !== newXpInfo.level) {
+					const [user, guild] = [this.client.users.cache.get(userID), this.client.guilds.cache.get(id)];
+					const channelID = this.getLastKnownChannelID(id, userID);
+					const channel = guild.channels.cache.get(channelID);
+					this.handler.runClientEvent("levelUp", [user, channel, guild, oldXpInfo, newXpInfo]);
+				}
 			}
 
 			guildStorage.set("xp", xpData);
 			this.guilds[id].xp = {};
 			this.guilds[id].counter = 0;
 		}
+	}
+
+	onLevelUp(ctx) {
+		if (ctx.channel)
+			return ctx.embed(`Congratulations ${ctx.user}, you've levelled up to level ${ctx.level}!`);
+		else return ctx.dmEmbed(`Congratulations ${ctx.user}, you've levelled up to level ${ctx.level} in ${ctx.guild.name}!`);
 	}
 
 	sanitizeText(text) {
@@ -125,10 +171,10 @@ module.exports = class XP extends BaseService {
 		return { level: level - 1, progress, required, total };
 	}
 
-	getXPData(guildID, userID = "") {
+	getXPData(guildID, userID = "", xpData) {
 		const guildStorage = this.client.dataHandler.getGuildStorage(guildID);
-		const xpData = guildStorage.get("xp");
-		const guildXpData = Object.entries(xpData).sort((a, b) => b[1] - a[1]).reduce((guildXpData, [id, totalXp], index, { length: totalRanks }) => {
+		const parsedXpData = xpData || guildStorage.get("xp") || guildStorage.set("xp", {});
+		const guildXpData = Object.entries(parsedXpData).sort((a, b) => b[1] - a[1]).reduce((guildXpData, [id, totalXp], index, { length: totalRanks }) => {
 			guildXpData[id] = { ...this.calculateLevel(totalXp), rank: +index + 1, totalRanks };
 			return guildXpData;
 		}, {});
