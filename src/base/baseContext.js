@@ -375,6 +375,10 @@ module.exports = class Context {
 		return this.error;
 	}
 
+	get level() {
+		return this.newXpInfo && this.newXpInfo.level;
+	}
+
 	react(...data) {
 		return this.message && this.message.react(...data);
 	}

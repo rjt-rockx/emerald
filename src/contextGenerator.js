@@ -303,6 +303,12 @@ class ContextGenerator {
 		[context.channel] = args;
 		return context;
 	}
+
+	levelUp(...args) {
+		const context = new Context(this.client, "levelUp");
+		[context.user, context.channel, context.guild, context.oldXpInfo, context.newXpInfo] = args;
+		return context;
+	}
 }
 
 module.exports = new ContextGenerator();
