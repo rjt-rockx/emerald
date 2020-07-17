@@ -16,62 +16,15 @@ class ServiceHandler {
 			hour: 3600,
 			day: 86400
 		};
-		this.clientEvents = [
-			"raw",
-			"channelCreate",
-			"channelDelete",
-			"channelPinsUpdate",
-			"channelUpdate",
-			"commandMessage",
-			"commandBlock",
-			"commandCancel",
-			"commandError",
-			"commandPrefixChange",
-			"commandRegister",
-			"commandReregister",
-			"commandRun",
-			"commandStatusChange",
-			"commandUnregister",
-			"debug",
-			"warn",
-			"emojiCreate",
-			"emojiDelete",
-			"emojiUpdate",
-			"guildBanAdd",
-			"guildBanRemove",
-			"guildCreate",
-			"guildDelete",
-			"guildMemberAdd",
-			"guildMemberRemove",
-			"guildMemberUpdate",
-			"inviteCreate",
-			"inviteDelete",
-			"presenceUpdate",
-			"voiceStateUpdate",
-			"guildMemberSpeaking",
-			"guildUpdate",
-			"message",
-			"messageDelete",
-			"messageReactionRemoveAll",
-			"messageDeleteBulk",
-			"messageReactionAdd",
-			"messageReactionRemove",
-			"messageReactionRemoveEmoji",
-			"messageUpdate",
-			"roleCreate",
-			"roleDelete",
-			"roleUpdate",
-			"typingStart",
-			"typingStop",
-			"userUpdate",
-			"webhookUpdate"
-		];
-		this.timedEvents = Object.keys(this.intervals);
+		this.clientEvents = new Set(userFunctions(this.client.contextGenerator));
+		this.clientEvents.delete("initialize");
+		this.clientEvents.delete("timedEvent");
+		this.timedEvents = new Set(Object.keys(this.intervals));
 		this.usedEvents = new Set();
 		this.addServicesIn("../../services");
-		this.registerUsedEvents();
-		this.registerClientEvents();
-		this.registerTimedEvents();
+		this.registerUsedEvents()
+			.registerClientEvents()
+			.registerTimedEvents();
 		if (!this.client.serviceHandler)
 			this.client.serviceHandler = this;
 		this.client.services = this.services;
@@ -85,8 +38,16 @@ class ServiceHandler {
 	addService(service) {
 		if (!this.checkIfValid(service)) return;
 		const serviceToAdd = new service(this.client);
-		if (Object.keys(this.services).includes(serviceToAdd.id)) return;
+		if (Object.keys(this.services).includes(serviceToAdd.id))
+			return;
 		this.services[serviceToAdd.id] = serviceToAdd;
+
+		const serviceEvents = userFunctions(service).filter(listener => this.usedEvents.has(onText(listener)) || this.usedEvents.has(everyText(listener)));
+		for (const event of serviceEvents) {
+			this.usedEvents.add(event);
+			event.startsWith("on") ? this.usedClientEvents.add(event) : this.usedTimedEvents.add(event);
+		}
+		return serviceToAdd;
 	}
 
 	addServicesIn(folder) {
@@ -96,6 +57,7 @@ class ServiceHandler {
 				this.addService(service);
 			}
 		}
+		return this;
 	}
 
 	listServices() {
@@ -133,6 +95,8 @@ class ServiceHandler {
 	}
 
 	async runClientEvent(event, args) {
+		if (!this.usedEvents.has(event))
+			return;
 		const context = this.client.contextGenerator[event](...args);
 		return Promise.all(Object.values(this.services)
 			.filter(service => typeof service[onText(event)] === "function" && service.enabled)
@@ -155,18 +119,21 @@ class ServiceHandler {
 		Object.values(this.services).reduce((events, service) => events.concat(userFunctions(service)), [])
 			.filter(eventName => eventName.startsWith("on") || eventName.startsWith("every"))
 			.forEach(event => this.usedEvents.add(event));
+		return this;
 	}
 
 	registerClientEvents() {
-		this.usedClientEvents = this.clientEvents.filter(event => this.usedEvents.has(onText(event)));
+		this.usedClientEvents = new Set([...this.clientEvents].filter(event => this.usedEvents.has(onText(event))));
 		for (const event of this.usedClientEvents)
 			this.client.on(event, (...args) => this.runClientEvent(event, args));
+		return this;
 	}
 
 	registerTimedEvents() {
-		this.usedTimedEvents = this.timedEvents.filter(interval => this.usedEvents.has(everyText(interval)));
+		this.usedTimedEvents = new Set([...this.timedEvents].filter(interval => this.usedEvents.has(everyText(interval))));
 		for (const event of this.usedTimedEvents)
 			setInterval(() => this.runTimedEvent(event, []), this.intervals[event] * 1000);
+		return this;
 	}
 }
 
