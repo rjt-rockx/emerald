@@ -8,6 +8,10 @@ module.exports = class baseService {
 		this.guildOnly = !!serviceInfo.guildOnly;
 	}
 
+	get handler() {
+		return this.client.serviceHandler;
+	}
+
 	get id() {
 		return this.constructor.name.toLowerCase();
 	}
