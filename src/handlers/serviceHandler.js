@@ -42,7 +42,7 @@ class ServiceHandler {
 			return;
 		this.services[serviceToAdd.id] = serviceToAdd;
 
-		const serviceEvents = userFunctions(service).filter(listener => this.usedEvents.has(onText(listener)) || this.usedEvents.has(everyText(listener)));
+		const serviceEvents = userFunctions(serviceToAdd).filter(listener => this.usedEvents.has(onText(listener)) || this.usedEvents.has(everyText(listener)));
 		for (const event of serviceEvents) {
 			this.usedEvents.add(event);
 			event.startsWith("on") ? this.usedClientEvents.add(event) : this.usedTimedEvents.add(event);
