@@ -3,6 +3,7 @@ const logger = require("../utilities/logger.js");
 const paginator = require("../utilities/paginator.js");
 const { idSort, byText } = require("../utilities/utilities.js");
 const diff = require("../utilities/diffUtils.js");
+const nadekoConnector = require("../utilities/nadekoConnector.js");
 const dataHandler = require("../handlers/dataHandler.js");
 
 const AuditLogEvents = {
@@ -53,6 +54,10 @@ module.exports = class Context {
 		this.paginate = (...data) => new this.paginator(this, ...data).initialize();
 		this.partialErrorHandler = () => { };
 	}
+
+	get nadekoConnector() {
+		return nadekoConnector;
+	}	
 
 	async fetchPartials() {
 		const props = ["message", "newMessage", "channel", "newChannel", "oldChannel", "reaction", "oldMessage", "newMessage"];
