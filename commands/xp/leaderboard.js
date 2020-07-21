@@ -26,7 +26,7 @@ module.exports = class Leaderboard extends BaseCommand {
 		const guildXpData = ctx.services.xp.getXPData(ctx.guild.id);
 		const lbFields = Object.entries(guildXpData)
 			.map(([uid, xpData]) => ({
-				name: `${xpData.rank}. ${ctx.client.users.cache.get(uid).tag}`,
+				name: `${xpData.rank}. ${ctx.client.users.cache.has(uid) ? ctx.client.users.cache.get(uid).tag : uid}`,
 				value: `Level ${xpData.level} | ${xpData.total} XP`,
 				inline: false
 			}));
