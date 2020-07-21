@@ -6,7 +6,26 @@ module.exports = class RoleGreet extends BaseCommand {
 			name: "rolegreet",
 			aliases: ["rg"],
 			group: "roles",
-			description: "Greet the user when they are given a specific role.",
+			description: [
+				"Greet the user when they are given a specific role. Available placeholders are: ",
+				[
+					"%servername%",
+					"%serverid%",
+					"%servermembercount%",
+					"%servermembercountordinal%",
+					"%channelname%",
+					"%channelmention%",
+					"%channelid%",
+					"%username%",
+					"%usertag%",
+					"%usermention%",
+					"%rolename%",
+					"%roleid%",
+					"%rolemention%",
+					"%rolemembercount%",
+					"%rolemembercountordinal%"
+				].map(p => `\`${p}\``).join(", ")
+			].join("\n"),
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS", "MANAGE_ROLES"],
 			userPermissions: ["MANAGE_ROLES", "MANAGE_GUILD"],
 			guildOnly: true,
