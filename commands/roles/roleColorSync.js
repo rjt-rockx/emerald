@@ -5,7 +5,7 @@ module.exports = class RoleColorSync extends BaseCommand {
 		super(client, {
 			name: "rolecolorsync",
 			aliases: ["rcs"],
-			group: "basic",
+			group: "roles",
 			description: "Sync a role color to a user's avatar.",
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS", "MANAGE_ROLES"],
 			userPermissions: ["MANAGE_ROLES", "MANAGE_GUILD"],
