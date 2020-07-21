@@ -5,7 +5,14 @@ module.exports = class XPOptions extends BaseCommand {
 	constructor(client) {
 		super(client, {
 			name: "xpoptions",
-			description: "Configure various options for XP.",
+			description: [
+				"Configure various options for XP.",
+				"Available options:",
+				"`messageConsidered` - Message length to be considered for XP gain. Can be either the `first` message length, the `longest` message length or the `average` message length.",
+				"`minuteInterval` - Interval (in minutes) at which XP can be gained. Should be between `1` and `60`.",
+				"`maxCharCount` - Maximum characters counted in a message. Should be less than `2000`.",
+				"`globalMultiplier` - Multiplier to be applied for XP gain globally on this server. Default is `1`."
+			].join("\n"),
 			group: "xp",
 			aliases: ["xpopts"],
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
