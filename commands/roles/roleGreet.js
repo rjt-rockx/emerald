@@ -86,17 +86,18 @@ module.exports = class RoleGreet extends BaseCommand {
 				return ctx.embed("No role greetings set.");
 			delete roleGreetings[ctx.args.role.id];
 			ctx.guildStorage.set("roleGreetings", roleGreetings);
-			return ctx.embed(`Role greetings removed for ${ctx.args.role.name}.`);
+			return ctx.embed(`Role greeting removed for ${ctx.args.role.name}.`);
 		}
 		else if (ctx.args.action === "list") {
 			const greetings = Object.entries(roleGreetings);
 			if (!greetings.length)
 				return ctx.embed("No role greetings set.");
-			const fields = greetings.map(([roleID, { channel, message }]) => ({
+			const fields = greetings.map(([roleID, greeting]) => ({
 				name: ctx.guild.roles.cache.has(roleID) ? ctx.guild.roles.cache.get(roleID).name : roleID,
 				value: [
-					`**Channel:** ${ctx.guild.channels.cache.has(channel) ? ctx.guild.channels.cache.get(channel) : channel}`,
-					`**Message:**\n ${message}`
+					`**Channel:** ${ctx.guild.channels.cache.has(greeting.channel) ? ctx.guild.channels.cache.get(greeting.channel) : greeting.channel}`,
+					`**Message:**\n ${greeting.message}`,
+					[`**Embed:** ${!!greeting.embed}`, `**Timeout:** ${greeting.timeout ? greeting.timeout + "s" : "none"}`].join(" ")
 				].join("\n"),
 				inline: false
 			}));

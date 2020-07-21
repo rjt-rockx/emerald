@@ -22,7 +22,7 @@ module.exports = class RoleGreet extends BaseService {
 		return "th";
 	}
 
-	replacePlaceholders(ctx, channel, role, message) {
+	replacePlaceholders(ctx, role, { channel, message }) {
 		let replacedMessage = message;
 		const toReplace = [
 			["%servername%", ctx.guild.name],
@@ -46,9 +46,21 @@ module.exports = class RoleGreet extends BaseService {
 		return replacedMessage;
 	}
 
-	async sendGreeting(ctx, channel, role, message) {
-		const replacedMessage = this.replacePlaceholders(ctx, channel, role, message);
-		return channel.send(replacedMessage);
+	async sendGreeting(ctx, role, greeting) {
+		const replacedMessage = this.replacePlaceholders(ctx, role, greeting);
+		let message;
+		if (greeting.embed) {
+			const embedProperties = {};
+			if (greeting.color)
+				embedProperties.color = greeting.color;
+			if (greeting.image)
+				embedProperties.image = { url: greeting.image };
+			message = greeting.channel.send({ embed: { description: replacedMessage, ...embedProperties } });
+		}
+		else message = greeting.channel.send(replacedMessage);
+		if (greeting.timeout)
+			return message.then(m => m.delete({ timeout: +greeting.timeout * 1000 }));
+		return message;
 	}
 
 	async onGuildMemberUpdate(ctx) {
@@ -65,7 +77,7 @@ module.exports = class RoleGreet extends BaseService {
 			if (!roleChanges.old.cache.has(roleID) && roleChanges.new.cache.has(roleID)) {
 				const channel = ctx.guild.channels.cache.get(greeting.channel);
 				if (!channel) continue;
-				this.sendGreeting(ctx, channel, role, greeting.message);
+				this.sendGreeting(ctx, role, { ...greeting, channel });
 			}
 		}
 	}
