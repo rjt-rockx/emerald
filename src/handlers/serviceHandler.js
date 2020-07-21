@@ -72,7 +72,7 @@ class ServiceHandler {
 	getServiceEvents(id) {
 		const service = this.getService(id);
 		if (!service) return;
-		return userFunctions(service).filter(listener => this.usedEvents.has(onText(listener)) || this.usedEvents.has(everyText(listener)));
+		return userFunctions(service).filter(listener => this.usedEvents.has(listener));
 	}
 
 	enableService(id) {
@@ -96,7 +96,7 @@ class ServiceHandler {
 	}
 
 	async runClientEvent(event, args) {
-		if (!this.usedEvents.has(event))
+		if (!this.usedEvents.has(onText(event)))
 			return;
 		const context = this.client.contextGenerator[event](...args);
 		return Promise.all(Object.values(this.services)
