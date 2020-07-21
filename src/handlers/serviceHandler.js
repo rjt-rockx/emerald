@@ -11,6 +11,7 @@ class ServiceHandler {
 		this.intervals = {
 			minute: 60,
 			fiveMinutes: 300,
+			tenMinutes: 600,
 			fifteenMinutes: 900,
 			halfAnHour: 1800,
 			hour: 3600,
