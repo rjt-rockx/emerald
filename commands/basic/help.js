@@ -50,7 +50,7 @@ module.exports = class Help extends BaseCommand {
 		let commandTitle = escapeMarkdown(prefixToUse + command.name), commandArgs = "";
 		if (command.argsCollector && command.argsCollector.args && Array.isArray(command.argsCollector.args)) {
 			const argKeys = command.argsCollector.args.map(arg => {
-				const argName = (arg.oneOf && arg.oneOf.length < 4) ? arg.oneOf.join("/") : arg.key;
+				const argName = (arg.oneOf && arg.oneOf.length < 3) ? arg.oneOf.join("/") : arg.key;
 				return `${typeof arg.default !== "undefined" && arg.default !== null ? `[${argName}]` : `<${argName}>`}`;
 			});
 			commandTitle += ` ${argKeys.join(" ")}`;
