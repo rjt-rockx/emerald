@@ -1,15 +1,8 @@
-const { Collection, GuildMember, Message, BitField } = require("discord.js");
+const { Collection, GuildMember, Message, Emoji, BitField } = require("discord.js");
 
 const isObject = d => typeof d === "object" && d !== null;
 const isBitField = element => element !== null && element instanceof BitField && typeof element.bitfield === "number";
-const arraysEqual = (a, b) => {
-	if (a === b) return true;
-	if (a == null || b == null) return false;
-	if (a.length !== b.length) return false;
-	for (let index = 0; index < a.length; ++index)
-		if (a[index] !== b[index]) return false;
-	return true;
-};
+const areEqualArrays = (a, b) => a.length === b.length && a.every(item => b.includes(item)) && b.every(item => a.includes(item));
 
 const flatten = (obj, ...props) => {
 	if (!isObject(obj)) return obj;
@@ -41,48 +34,42 @@ const flatten = (obj, ...props) => {
 	return out;
 };
 
-const getChanges = (oldInstance, newInstance, changes = {}) => {
-	const flattened = {
-		old: flatten(oldInstance),
-		new: flatten(newInstance)
-	};
-	const keys = Object.keys({ ...flattened.old, ...flattened.new });
-	for (const key of keys) {
-		if (flattened.old[key] === flattened.new[key])
-			continue;
-		else if (flattened.old[key] !== flattened.new[key]
-			|| typeof flattened.old[key] !== typeof flattened.new[key]) {
-			if (Array.isArray(flattened.old[key]) && Array.isArray(flattened.new[key]) && arraysEqual(flattened.old[key], flattened.new[key]))
-				continue;
-			if (isBitField(oldInstance[key]) && isBitField(newInstance[key]) && (oldInstance[key].bitfield === newInstance[key].bitfield))
-				continue;
-			changes[key] = {
-				old: oldInstance[key],
-				new: newInstance[key]
+const getChanges = (oldInstance, newInstance, key, changes = {}) => {
+	if (Array.isArray(oldInstance[key]) && Array.isArray(newInstance[key]) && !areEqualArrays(oldInstance[key], newInstance[key])) {
+		changes[key] = {
+			old: oldInstance[key],
+			new: newInstance[key]
+		};
+	}
+	else if (oldInstance[key] !== newInstance[key]) {
+		if (isBitField(oldInstance[key]) && isBitField(newInstance[key]) && (oldInstance[key].bitfield === newInstance[key].bitfield))
+			return;
+		changes[key] = {
+			old: oldInstance[key],
+			new: newInstance[key]
+		};
+		if (key.endsWith("ID")) {
+			const extraKey = key.substring(0, key.lastIndexOf("ID"));
+			changes[extraKey] = {
+				old: oldInstance[extraKey],
+				new: newInstance[extraKey]
 			};
-			if (key.endsWith("ID")) {
-				const extraKey = key.substring(0, key.lastIndexOf("ID"));
-				changes[extraKey] = {
-					old: oldInstance[extraKey],
-					new: newInstance[extraKey]
-				};
-			}
 		}
 	}
-	return changes;
 };
 
 const diff = (oldInstance, newInstance) => {
 	const changes = {};
 	if ([oldInstance, newInstance].every(i => i instanceof GuildMember)) {
+		Object.keys(flatten(newInstance, { roles: true })).forEach(key => getChanges(oldInstance, newInstance, key, changes));
 		const voiceChanges = {}, presenceChanges = {};
-		getChanges(oldInstance.voice, newInstance.voice, voiceChanges);
+		Object.keys(flatten(newInstance.voice)).forEach(key => getChanges(oldInstance.voice, newInstance.voice, key, voiceChanges));
 		if (Object.keys(voiceChanges).length)
 			changes.voice = {
 				old: oldInstance.voice,
 				new: newInstance.voice
 			};
-		getChanges(oldInstance.presence, newInstance.presence, presenceChanges);
+		Object.keys(flatten(newInstance.presence)).forEach(key => getChanges(oldInstance.presence, newInstance.presence, key, presenceChanges));
 		if (Object.keys(presenceChanges).length)
 			changes.presence = {
 				old: oldInstance.presence,
@@ -91,13 +78,13 @@ const diff = (oldInstance, newInstance) => {
 	}
 	else if ([oldInstance, newInstance].every(i => i instanceof Message)) {
 		const editChanges = {}, mentionChanges = {};
-		getChanges(oldInstance.edits, newInstance.edits, editChanges);
+		Object.keys(flatten(newInstance.edits)).forEach(key => getChanges(oldInstance.edits, newInstance.edits, key, editChanges));
 		if (Object.keys(editChanges).length)
 			changes.edits = {
 				old: oldInstance.edits,
 				new: newInstance.edits
 			};
-		getChanges(oldInstance.mentions, newInstance.mentions, mentionChanges);
+		Object.keys(flatten(newInstance.mentions)).forEach(key => getChanges(oldInstance.mentions, newInstance.mentions, key, mentionChanges));
 		if (Object.keys(mentionChanges).length)
 			changes.mentions = {
 				old: oldInstance.mentions,
@@ -112,9 +99,12 @@ const diff = (oldInstance, newInstance) => {
 			};
 		}
 	}
-	else getChanges(oldInstance, newInstance, changes);
+	else if ([oldInstance, newInstance].every(i => i instanceof Emoji))
+		Object.keys(flatten(newInstance, { roles: true })).forEach(key => getChanges(oldInstance, newInstance, key, changes));
+	else Object.keys(flatten(newInstance)).forEach(key => getChanges(oldInstance, newInstance, key, changes));
 	return changes;
 };
 
 module.exports = diff;
 module.exports.flatten = flatten;
+module.exports.getChanges = getChanges;
