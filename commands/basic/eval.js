@@ -21,7 +21,7 @@ module.exports = class Eval extends BaseCommand {
 		this.silent = false;
 		this.lastResult = null;
 		this.timeoutFlag = true;
-		this.newTimeout = (seconds = 60) => this.timeoutFlag = true && setTimeout(async () => {
+		this.newTimeout = (seconds = 120) => this.timeoutFlag = true && setTimeout(async () => {
 			const existingReaction = this.lastEval.reactions.cache.find(reaction => reaction.me);
 			if (existingReaction)
 				existingReaction.remove().catch(() => { });
