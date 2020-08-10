@@ -136,9 +136,11 @@ module.exports = class XP extends BaseService {
 		const customEmojiRegex = /<(?<identifier>:(?<name>.*?):)(?<id>\d*?)>/gmi;
 		const regularEmojiRegex = /(:)(?<name>[\w-]*?)(\1)/gmi;
 		const formattingRegex = /(?<start>```|`|\*\*|\*|__|_|~~|\|\|)(?<content>.*?)(?<end>\1)/gmi;
+		const urlRegex = /(https?:\/\/(www\.)?)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/gm;
 		const gapRegex = /(?<gapChar>\s|\n)+/gmi;
 
 		const filteredContent = String(text)
+			.replace(urlRegex, "#")
 			.replace(idRegex, " ")
 			.replace(customEmojiRegex, "#")
 			.replace(regularEmojiRegex, "#")
