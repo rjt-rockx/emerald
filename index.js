@@ -35,9 +35,9 @@ client.once("ready", async () => {
 	dataHandler.initialize(client)
 		.then(guildStorages => logger.info(`${guildStorages.length} guilds initialized.`))
 		.catch(logger.error);
-
-	client.user.setActivity(`Type ${client.commandPrefix}help for help!`);
 });
+
+client.on("ready", () => client.user.setActivity(`Type ${client.commandPrefix}help for help!`));
 
 client.on("error", err => logger.error(err));
 
