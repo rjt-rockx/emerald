@@ -23,8 +23,7 @@ jobs:
         debug: true
         script_stop: true
         script: |
-          cd ~/emerald/
           pm2 stop emerald
           git pull
           npm i
-          pm2 start index.js --name emerald
+          pm2 start ~/scripts/emerald.sh
