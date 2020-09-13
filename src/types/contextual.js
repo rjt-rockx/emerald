@@ -16,7 +16,7 @@ class ContextualType extends ArgumentType {
 		if (["user"].includes(value))
 			return msg.author;
 		if (["role"].includes(value))
-			return msg.member.roles.highest || msg.member.roles.highest || msg.member.roles.cache.first;
+			return msg.member.roles.highest || msg.member.roles.cache.first;
 		if (["voice", "voicechannel", "vc"].includes(value))
 			return msg.member.voice.channelID && msg.member.voice.channel;
 		if (["category"].includes(value))
@@ -35,7 +35,7 @@ class ContextualType extends ArgumentType {
 		if (["user"].includes(value))
 			return msg.author;
 		if (["role"].includes(value))
-			return msg.member.roles.highest || msg.member.roles.highest || msg.member.roles.cache.first;
+			return msg.member.roles.highest || msg.member.roles.cache.first;
 		if (["voice", "voicechannel", "vc"].includes(value))
 			return msg.member.voice.channelID && msg.member.voice.channel;
 		if (["category"].includes(value))
