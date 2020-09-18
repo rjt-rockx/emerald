@@ -146,19 +146,30 @@ module.exports = class Eval extends BaseCommand {
 	async sendResult(ctx = this.currentContext, result) {
 		if (this.silent) {
 			ctx.message.delete().catch(() => { });
-			return;
+			return Promise.resolve(result);
 		}
 		if (result.length < 2) {
 			if (this.reusableMessage)
 				return this.reusableMessage.edit(result[0]);
 			return ctx.send(result[0]).then(m => this.reusableMessage = m);
 		}
-		if (!this.reusableMessage)
-			return result.map(item => ctx.send(item));
+		if (!this.reusableMessage) {
+			if (result.length > 4)
+				return Promise.all(result.slice(0, 4).map(item => ctx.send(item)))
+					.then(data => [...data, ctx.send(["```", `and ${result.length - 4} more messages`, "```"].join("\n"))]);
+			return Promise.all(result.map(item => ctx.send(item)));
+		}
 		if (this.reusableMessage) {
-			const promises = result.map((item, index) => +index < 1 ? this.reusableMessage.edit(item) : ctx.send(item));
+			let resultPromise;
+			if (result.length > 4) {
+				const resultMessages = result.slice(0, 4).map((item, index) => +index < 1 ? this.reusableMessage.edit(item) : ctx.send(item));
+				resultPromise = Promise.all(resultMessages)
+					.then(data => [...data, ctx.send(["```", `and ${result.length - 4} more messages`, "```"].join("\n"))]);
+			}
+			else if (result.length <= 4)
+				resultPromise = Promise.all(result.map((item, index) => +index < 1 ? this.reusableMessage.edit(item) : ctx.send(item)));
 			this.reusableMessage = null;
-			return promises;
+			return resultPromise;
 		}
 	}
 
