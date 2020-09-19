@@ -6,7 +6,7 @@ module.exports = class Stats extends BaseCommand {
 	constructor(client) {
 		super(client, {
 			name: "stats",
-			group: "basic",
+			group: "utils",
 			description: "Get the current stats of the bot.",
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS"]
 		});

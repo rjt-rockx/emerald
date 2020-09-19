@@ -4,7 +4,7 @@ module.exports = class MemberCount extends BaseCommand {
 	constructor(client) {
 		super(client, {
 			name: "membercount",
-			group: "basic",
+			group: "utils",
 			aliases: ["mcount"],
 			description: "Get the member count of the server.",
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS"]

@@ -6,7 +6,7 @@ module.exports = class Berd extends BaseCommand {
 	constructor(client) {
 		super(client, {
 			name: "berd",
-			group: "basic",
+			group: "misc",
 			description: "Generate a random berd.",
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS", "ATTACH_FILES"],
 			args: [

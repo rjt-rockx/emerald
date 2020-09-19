@@ -4,7 +4,7 @@ module.exports = class Ping extends BaseCommand {
 	constructor(client) {
 		super(client, {
 			name: "ping",
-			group: "basic",
+			group: "utils",
 			description: "Get the ping of the bot.",
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS"]
 		});

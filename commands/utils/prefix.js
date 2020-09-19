@@ -4,7 +4,7 @@ module.exports = class Prefix extends BaseCommand {
 	constructor(client) {
 		super(client, {
 			name: "prefix",
-			group: "basic",
+			group: "utils",
 			description: "Get or set the prefix for this guild.",
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
 			userPermissions: ["MANAGE_GUILD"],

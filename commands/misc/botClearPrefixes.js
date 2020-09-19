@@ -5,7 +5,7 @@ module.exports = class BotClear extends BaseCommand {
 		super(client, {
 			name: "botclearprefixes",
 			aliases: ["botclearprefix", "bcprefixes", "bcprefix"],
-			group: "basic",
+			group: "misc",
 			description: "Add, remove or list the prefixes configured for botclear.",
 			args: [
 				{
@@ -50,9 +50,9 @@ module.exports = class BotClear extends BaseCommand {
 		}
 		else if (ctx.args.action === "remove") {
 			if (!ctx.args.prefix)
-				return ctx.embed({ description: "Invalid prefix specified."});
+				return ctx.embed({ description: "Invalid prefix specified." });
 			if (!prefixes.includes(ctx.args.prefix.toLowerCase()))
-				return ctx.embed({ description: "The given botclear prefix does not exist."});
+				return ctx.embed({ description: "The given botclear prefix does not exist." });
 			prefixes = prefixes.filter(p => p !== ctx.args.prefix.toLowerCase());
 			prefixes = [...new Set(prefixes)];
 			ctx.guildStorage.set("botPrefixes", prefixes);

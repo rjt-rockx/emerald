@@ -4,7 +4,7 @@ module.exports = class Say extends BaseCommand {
 	constructor(client) {
 		super(client, {
 			name: "say",
-			group: "basic",
+			group: "misc",
 			description: "Make the bot say something.",
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
 			args: [
