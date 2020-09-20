@@ -12,7 +12,6 @@ module.exports = class AutoPublish extends BaseService {
 	}
 
 	async onMessage(ctx) {
-		if (ctx.message.author.bot) return;
 		const autoPublishChannels = ctx.guildStorage.get("autoPublishChannels") || ctx.guildStorage.set("autoPublishChannels", []);
 		if (autoPublishChannels.includes(ctx.channel.id) && ctx.channel.type === "news")
 			ctx.message.crosspost();
