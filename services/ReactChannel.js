@@ -1,4 +1,4 @@
-const urlRegex = require("url-regex-local")({ exact: false, strict: false });
+// const urlRegex = require("url-regex-local")({ exact: false, strict: false });
 const BaseService = require("../src/base/baseService.js");
 
 module.exports = class ReactChannel extends BaseService {
