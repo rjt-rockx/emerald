@@ -47,10 +47,10 @@ module.exports = class Stats extends BaseCommand {
 				{
 					name: "Useful links",
 					value: Object.entries({
-						invite: await ctx.client.generateInvite("ADMINISTRATOR"),
+						invite: await ctx.client.generateInvite({ permissions: "ADMINISTRATOR" }),
 						homepage: pkg.homepage || "",
 						issues: pkg.bugs.url || ""
-					}).reduce((acc, [k,v]) => v ? acc.push(`[${toTitleCase(k)}](${v})`) && acc : acc, []).join(" | ")
+					}).reduce((acc, [k, v]) => v ? acc.push(`[${toTitleCase(k)}](${v})`) && acc : acc, []).join(" | ")
 				}
 			],
 			footer: { text: `Bot ID: ${ctx.client.user.id}` }
