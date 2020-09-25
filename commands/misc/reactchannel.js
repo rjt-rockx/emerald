@@ -1,11 +1,11 @@
 const BaseCommand = require("../../src/base/baseCommand.js");
 const reactionMap = {
 	like: ["👍"],
-	dislike: ["👎"],
-	likedislike: ["👍", "👎"],
+	thumbs: ["👍", "👎"],
 	upvote: ["🔺"],
-	downvote: ["🔻"],
-	upvotedownvote: ["🔺", "🔻"]
+	triangles: ["🔺", "🔻"],
+	up: ["⬆️"],
+	arrows: ["⬆️", "⬇️"]
 };
 
 module.exports = class ReactChannel extends BaseCommand {
@@ -31,7 +31,7 @@ module.exports = class ReactChannel extends BaseCommand {
 				},
 				{
 					key: "reactionType",
-					prompt: "One of the folowing:\nLike => 👍\nDislike =>👎\nLikeDislike => 👍,👎\nUpvote => 🔺\nDownvote => 🔻\nUpvoteDownvote => 🔺,🔻",
+					prompt: "One of the folowing:\n" + Object.entries(reactionMap).map(([key, value]) => `\`${(key)}\` - ${value.join(", ")}`).join(", "),
 					type: "string",
 					oneOf: ["like", "likedislike", "dislike", "upvote", "downvote", "upvotedownvote"],
 					default: "upvote"
