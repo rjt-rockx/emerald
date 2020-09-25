@@ -33,7 +33,7 @@ module.exports = class ReactChannel extends BaseCommand {
 					key: "reactionType",
 					prompt: "One of the folowing:\n" + Object.entries(reactionMap).map(([key, value]) => `\`${(key)}\` - ${value.join(", ")}`).join(", "),
 					type: "string",
-					oneOf: ["like", "likedislike", "dislike", "upvote", "downvote", "upvotedownvote"],
+					oneOf: Object.keys(reactionMap).map(key => key.toLowerCase()),
 					default: "upvote"
 				}
 			]
