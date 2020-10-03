@@ -9,6 +9,17 @@ module.exports = class BaseCommand extends Command {
 		});
 		if (this.argsCollector)
 			this.argsCollector.promptLimit = 0;
+		this.checkInhibitor(commandInfo);
+	}
+
+	checkInhibitor(commandInfo) {
+		if (commandInfo.inhibitor && typeof commandInfo.inhibitor === "function") {
+			this.client.dispatcher.addInhibitor(commandMessage => {
+				if (commandMessage.command.name === commandInfo.command.name && commandMessage.command.memberName === commandInfo.command.memberName)
+					return commandInfo.inhibitor(commandMessage);
+				return false;
+			});
+		}
 	}
 
 	/**
