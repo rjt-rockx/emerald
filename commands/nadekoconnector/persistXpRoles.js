@@ -22,6 +22,7 @@ module.exports = class PersistXpRoles extends BaseCommand {
 
 	async task(ctx) {
 		ctx.guildStorage.set("ncpersistxprolerews", ctx.args.enabled === "enable");
+		ctx.services.ncrolerewards.syncRolerewards(ctx);
 		return ctx.embed(`XP role reward persistence for this server successfully ${ctx.args.enabled + "d"}.`);
 	}
 };

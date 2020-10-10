@@ -22,6 +22,7 @@ module.exports = class StackXpRoles extends BaseCommand {
 
 	async task(ctx) {
 		ctx.guildStorage.set("ncstackxprolerews", ctx.args.enabled === "enable");
+		ctx.services.ncrolerewards.syncRolerewards(ctx);
 		return ctx.embed(`XP role reward stacking for this server successfully ${ctx.args.enabled + "d"}.`);
 	}
 };
