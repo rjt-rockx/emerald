@@ -16,13 +16,13 @@ module.exports = class NCRoleRewards extends BaseService {
 	everyHalfAnHour(timeContext) {
 		for (const guild of this.client.guilds.cache.values()) {
 			const ctx = timeContext.clone({ guild });
-			if (!ctx.nadekoConnector || !ctx.guildStorage.get("ncpersistxprolerews"))
-				continue;
-			this.syncRoleRewards(ctx, ctx.guildStorage.get("ncstackxprolerews"));
+			this.syncRoleRewards(ctx);
 		}
 	}
 
-	async syncRoleRewards(ctx, stack) {
+	async syncRoleRewards(ctx) {
+		if (!ctx.nadekoConnector || !ctx.guildStorage.get("ncpersistxprolerews"))
+			return;
 		if (this.inProgress.has(ctx.guild.id))
 			return;
 		this.inProgress.add(ctx.guild.id);
@@ -40,7 +40,7 @@ module.exports = class NCRoleRewards extends BaseService {
 			if (!member || !(member instanceof GuildMember))
 				continue;
 
-			const rolesToAssign = this.rolesToAssign(roleRewards, lbUser.level, stack);
+			const rolesToAssign = this.rolesToAssign(roleRewards, lbUser.level, ctx.guildStorage.get("ncstackxprolerews"));
 			for (const [roleId, shouldHave] of Object.entries(rolesToAssign)) {
 				if (!member.roles.cache.has(roleId) && shouldHave)
 					await member.roles.add(roleId);
