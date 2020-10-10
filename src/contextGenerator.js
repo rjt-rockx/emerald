@@ -8,8 +8,8 @@ class ContextGenerator {
 		return this;
 	}
 
-	timedEvent() {
-		return this.defaultContext;
+	timedEvent(eventName) {
+		return new Context(this.client, eventName);
 	}
 
 	raw(...args) {

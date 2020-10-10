@@ -133,7 +133,7 @@ class ServiceHandler {
 	registerTimedEvents() {
 		this.usedTimedEvents = new Set([...this.timedEvents].filter(interval => this.usedEvents.has(everyText(interval))));
 		for (const event of this.usedTimedEvents)
-			setInterval(() => this.runTimedEvent(event, []), this.intervals[event] * 1000);
+			setInterval(() => this.runTimedEvent(event, [event]), this.intervals[event] * 1000);
 		return this;
 	}
 }
