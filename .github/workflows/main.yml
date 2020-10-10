@@ -24,7 +24,5 @@ jobs:
         script_stop: true
         script: |
           pm2 stop emerald
-          cd ~/emerald
-          git pull
-          npm i
+          bash ~scripts/update-emerald.sh
           pm2 start ~/scripts/emerald.sh
