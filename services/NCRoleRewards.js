@@ -10,6 +10,7 @@ module.exports = class NCRoleRewards extends BaseService {
 			guildOnly: true,
 			fetchPartials: true
 		});
+		this.inProgress = new Set();
 	}
 
 	everyHalfAnHour(timeContext) {
@@ -22,6 +23,9 @@ module.exports = class NCRoleRewards extends BaseService {
 	}
 
 	async syncRoleRewards(ctx, stack) {
+		if (this.inProgress.has(ctx.guild.id))
+			return;
+		this.inProgress.add(ctx.guild.id);
 		const roleRewards = await ctx.nadekoConnector.getGuildXpRoleRewards(ctx.guild.id, 0, ctx.guild.roles.cache.size);
 		const leaderboard = await ctx.nadekoConnector.getGuildXpLeaderboard(ctx.guild.id, 0, ctx.guild.members.cache.size);
 		if (!roleRewards || !leaderboard) return;
@@ -44,6 +48,7 @@ module.exports = class NCRoleRewards extends BaseService {
 					await member.roles.remove(roleId);
 			}
 		}
+		this.inProgress.remove(ctx.guild.id);
 	}
 
 	rolesToAssign(roles, level, stack) {
