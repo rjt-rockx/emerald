@@ -3,7 +3,7 @@ const logger = require("../utilities/logger.js");
 const paginator = require("../utilities/paginator.js");
 const { idSort, byText } = require("../utilities/utilities.js");
 const diff = require("../utilities/diffUtils.js");
-const nadekoConnector = require("../utilities/nadekoConnector.js");
+const NadekoConnectorClient = require("../utilities/nadekoConnector.js");
 const dataHandler = require("../handlers/dataHandler.js");
 
 const AuditLogEvents = {
@@ -45,7 +45,7 @@ const AuditLogEvents = {
 	integrationDelete: 82
 };
 module.exports = class Context {
-	constructor(client, event) {
+	constructor(client, event, data = {}) {
 		this.client = client;
 		this.event = event;
 		this.emittedAt = new Date();
@@ -53,11 +53,14 @@ module.exports = class Context {
 		this.paginator = paginator;
 		this.paginate = (...data) => new this.paginator(this, ...data).initialize();
 		this.partialErrorHandler = () => { };
+		Object.assign(this, data);
 	}
 
-	get nadekoConnector() {
-		return nadekoConnector;
-	}	
+	clone(data = {}) {
+		const newContext = Object.assign(Object.create(this), this);
+		Object.assign(newContext, data);
+		return newContext;
+	}
 
 	async fetchPartials() {
 		const props = ["message", "newMessage", "channel", "newChannel", "oldChannel", "reaction", "oldMessage", "newMessage"];
@@ -436,5 +439,21 @@ module.exports = class Context {
 
 	selfDestructEmbed(data, seconds = 10) {
 		return this.channel && this.channel.send(new MessageEmbed(data)).then(m => m.delete({ timeout: seconds * 1000 }));
+	}
+
+	get nadekoConnector() {
+		if (this._nadekoConnector instanceof NadekoConnectorClient)
+			return this._nadekoConnector;
+
+		if (!this.guildStorage)
+			return undefined;
+		const nadekoConnector = this.guildStorage.get("nadekoconnector");
+		if (!nadekoConnector)
+			return undefined;
+		if (nadekoConnector && nadekoConnector.enabled) {
+			this._nadekoConnector = new NadekoConnectorClient(nadekoConnector.address, nadekoConnector.password);
+			return this._nadekoConnector;
+		}
+		return undefined;
 	}
 };
