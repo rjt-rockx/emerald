@@ -48,7 +48,7 @@ module.exports = class NCRoleRewards extends BaseService {
 					await member.roles.remove(roleId);
 			}
 		}
-		this.inProgress.remove(ctx.guild.id);
+		this.inProgress.delete(ctx.guild.id);
 	}
 
 	rolesToAssign(roles, level, stack) {
