@@ -8,7 +8,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v1
     - name: Install dependencies
-      run: npm i
+      run: npm ci
   update:
     name: Update
     runs-on: ubuntu-18.04
