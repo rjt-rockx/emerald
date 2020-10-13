@@ -1,5 +1,4 @@
 const BaseService = require("../src/base/baseService.js");
-const { getDuration } = require("../src/utilities/utilities.js");
 
 module.exports = class MessageExpiry extends BaseService {
 	constructor(client) {

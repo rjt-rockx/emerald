@@ -1,6 +1,7 @@
 const BaseCommand = require("../../src/base/baseCommand.js");
 const pkg = require("../../package.json");
-const { toTitleCase, getDuration } = require("../../src/utilities/utilities.js");
+const { toTitleCase } = require("../../src/utilities/utilities.js");
+const getDuration = require("pretty-ms");
 
 module.exports = class Stats extends BaseCommand {
 	constructor(client) {

@@ -23,10 +23,6 @@ const isDirectory = source => lstatSync(source).isDirectory() && !source.startsW
 const getDirectories = source => readdirSync(source).map(name => join(source, name)).filter(isDirectory).map(directory => parse(directory).name);
 const idSort = (a, b) => a.id.localeCompare(b.id, undefined, { numeric: true });
 const byText = text => text.toLowerCase() !== "all" ? text.toLowerCase() + "dBy" : "executor";
-const getDuration = t => {
-	const p_s = (t / 1000), s = (p_s % 60), p_m = (p_s / 60), m = (p_m % 60), p_h = (p_m / 24), h = (p_h % 24), d = (p_h / 24);
-	return Object.entries({ d, h, m, s }).filter(e => e[1] >= 1).map(([k, v]) => Math.floor(v) + k).join(" ");
-};
 
 const DiscordColors = {
 	RED: 0xF04747,
@@ -55,6 +51,5 @@ module.exports = {
 	isDirectory,
 	getDirectories,
 	idSort,
-	getDuration,
 	DiscordColors
 };

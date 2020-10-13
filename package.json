@@ -21,6 +21,7 @@
 		"jsonwebtoken": "^8.5.1",
 		"node-vibrant": "^3.1.5",
 		"parse-duration": "^0.4.4",
+		"pretty-ms": "^7.0.1",
 		"quick.db": "^7.1.2",
 		"url-regex-local": "^1.0.1"
 	},

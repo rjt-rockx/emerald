@@ -1,5 +1,5 @@
 const BaseCommand = require("../../src/base/baseCommand.js");
-const { getDuration } = require("../../src/utilities/utilities.js");
+const getDuration = require("pretty-ms");
 const { Role } = require("discord.js");
 
 module.exports = class ExpireMessages extends BaseCommand {
@@ -60,7 +60,7 @@ module.exports = class ExpireMessages extends BaseCommand {
 			ctx.guildStorage.set("messageExpiryChannels", messageExpiryChannels);
 			ctx.services.messageexpiry.purgeDeleteQueue(ctx.args.channel.id);
 			return ctx.embed([
-				`Messages ${hasIgnoredRoles ? "not sent by the following roles" : "sent"} in ${ctx.args.channel} will be deleted after ${getDuration(ctx.args.duration)}`,
+				`Messages ${hasIgnoredRoles ? "not sent by the following roles" : "sent"} in ${ctx.args.channel} will be deleted after ${getDuration(ctx.args.duration, { verbose: true })}`,
 				hasIgnoredRoles ? ctx.args.ignoredRoles.map(r => r.name).join(", ") : ""
 			].join("\n"));
 		}
