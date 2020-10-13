@@ -20,6 +20,7 @@
 		"json-bigint": "^1.0.0",
 		"jsonwebtoken": "^8.5.1",
 		"node-vibrant": "^3.1.5",
+		"parse-duration": "^0.4.4",
 		"quick.db": "^7.1.2",
 		"url-regex-local": "^1.0.1"
 	},
