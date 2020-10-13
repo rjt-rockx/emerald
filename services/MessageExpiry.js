@@ -66,7 +66,6 @@ module.exports = class MessageExpiry extends BaseService {
 
 	async onChannelPinsUpdate(ctx) {
 		const pinnedMessages = await ctx.channel.messages.fetchPinned();
-		this.toDelete = this.toDelete.filter(data => data.channelId !== ctx.channel.id
-			|| (data.channelId === ctx.channel.id && !pinnedMessages.some(id => id === data.messageId)));
+		this.toDelete = this.toDelete.filter(data => !(data.channelId === ctx.channel.id && pinnedMessages.keys().includes(data.messageId)));
 	}
 };
