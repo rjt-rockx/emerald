@@ -12,7 +12,9 @@ module.exports = class ApprovalChecker extends BaseService {
 		super(client, {
 			name: "Approval Checker Service",
 			description: "Reacts on messages sent in the approval channel, and listens for reactions to approve or deny an application.",
-			enabled: isStorageSupported
+			enabled: isStorageSupported,
+			fetchPartials: true,
+			guildOnly: true
 		});
 		if (isStorageSupported)
 			this.storage = new StorageWrapper(config.storage);

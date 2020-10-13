@@ -288,7 +288,8 @@ module.exports = class Context {
 		return this._member
 			|| this.newMember
 			|| (this._message && this._message.member)
-			|| (this._guild && this._user && this._guild.members.resolve(this._user.id));
+			|| (this._guild && this._user && this._guild.members.resolve(this._user.id))
+			|| (this.reaction && this.reaction.message && this.reaction.message.guild && this.user && this.reaction.message.guild.members.resolve(this.user));
 	}
 
 	set member(member) {
