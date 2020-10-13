@@ -246,6 +246,10 @@ module.exports = class Context {
 		return this.client.services;
 	}
 
+	get emittedTimestamp() {
+		return this.emittedAt.getTime();
+	}
+
 	get message() {
 		return this._message
 			|| this.newMessage
