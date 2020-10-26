@@ -26,7 +26,7 @@ module.exports = class Help extends BaseCommand {
 		const prefix = ctx.guildStorage.has("commandPrefix") ? ctx.guildStorage.get("commandPrefix") : ctx.client.commandPrefix;
 		if (ctx.args.command === "all") {
 			const allGroups = ctx.client.registry.groups.sort((a, b) => a.name.localeCompare(b.name));
-			const groupNames = allGroups.array().map(group => group.name);
+			const groupIDs = allGroups.array().map(group => group.id);
 			const allCommandPages = allGroups.map(group => this.getCommandPages(group, prefix, 4)).flat();
 			const allCommandFields = allCommandPages.map(page => page.fields);
 			return ctx.paginate(allCommandFields, {
@@ -36,7 +36,7 @@ module.exports = class Help extends BaseCommand {
 						description: "Type `.help` followed by the command name to see help for that command.",
 						footer: {
 							text: [
-								`Group ${groupNames.findIndex(name => name === allCommandPages[current - 1].group.name) + 1} of ${groupNames.length}`,
+								`Group ${groupIDs.findIndex(id => id === allCommandPages[current - 1].group.id) + 1} of ${groupIDs.length}`,
 								`Page ${current} of ${total}`
 							].join(" · ")
 						},

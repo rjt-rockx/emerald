@@ -27,9 +27,9 @@ class CommandHandler {
 		if (pathToCommand.endsWith(".js") && !pathToCommand.endsWith("index.js")) { // index.js is usually used as an index of all other js files in that dir
 			const command = require(pathToCommand);
 			if (this.checkIfValid(command)) {
-				const groupID = resolve(pathToCommand).substring(0, pathToCommand.indexOf(".")).split(sep).reverse()[1]; // we won't actually need the filename tbh
-				if (!this.client.registry.groups.has(groupID))
-					this.client.registry.registerGroup(groupID);
+				const groupName = resolve(pathToCommand).substring(0, pathToCommand.indexOf(".")).split(sep).reverse()[1]; // we won't actually need the filename tbh
+				if (!this.client.registry.groups.has(groupName.toLowerCase()))
+					this.client.registry.registerGroup(groupName.toLowerCase(), groupName);
 				this.client.registry.registerCommand(command);
 			}
 		}
