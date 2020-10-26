@@ -1,6 +1,6 @@
 const BaseCommand = require("../../src/base/baseCommand.js");
 const { Util: { escapeMarkdown } } = require("discord.js");
-const { toTitleCase } = require("../../src/utilities/utilities.js");
+const { toTitleCase, chunk } = require("../../src/utilities/utilities.js");
 
 module.exports = class Help extends BaseCommand {
 	constructor(client) {
@@ -25,12 +25,25 @@ module.exports = class Help extends BaseCommand {
 	async task(ctx) {
 		const prefix = ctx.guildStorage.has("commandPrefix") ? ctx.guildStorage.get("commandPrefix") : ctx.client.commandPrefix;
 		if (ctx.args.command === "all") {
-			const commands = this.client.registry.commands.array().sort((a, b) => a.name.localeCompare(b.name)).map(command => {
-				const commandData = this.getCommandData(command, prefix);
-				return { name: commandData.name, value: commandData.description };
-			});
-			return ctx.paginate(commands, {
-				embedTemplate: { title: "List of commands:" }
+			const allGroups = ctx.client.registry.groups.sort((a, b) => a.name.localeCompare(b.name));
+			const groupNames = allGroups.array().map(group => group.name);
+			const allCommandPages = allGroups.map(group => this.getCommandPages(group, prefix, 4)).flat();
+			const allCommandFields = allCommandPages.map(page => page.fields);
+			return ctx.paginate(allCommandFields, {
+				embedTemplate: ({ current, total }) => {
+					return {
+						title: `${toTitleCase(allCommandPages[current - 1].group.name)} commands`,
+						description: "Type `.help` followed by the command name to see help for that command.",
+						footer: {
+							text: [
+								`Group ${groupNames.findIndex(name => name === allCommandPages[current - 1].group.name) + 1} of ${groupNames.length}`,
+								`Page ${current} of ${total}`
+							].join(" · ")
+						},
+						thumbnail: { url: ctx.client.user.displayAvatarURL({ format: "png", dynamic: true, size: 1024 }) }
+					};
+				},
+				preChunked: true
 			});
 		}
 		const commandData = this.getCommandData(ctx.args.command, prefix);
@@ -69,5 +82,16 @@ module.exports = class Help extends BaseCommand {
 			description: command.description,
 			commandArgs, userperms, clientperms
 		};
+	}
+
+	getCommandPages(group, prefix, commandsPerPage) {
+		const commandFields = group.commands.array()
+			.sort((a, b) => a.name.localeCompare(b.name))
+			.map(command => {
+				const commandData = this.getCommandData(command, prefix);
+				return { name: commandData.name, value: commandData.description };
+			});
+		return chunk(commandFields, commandsPerPage)
+			.map(fields => ({ group, fields }));
 	}
 };
