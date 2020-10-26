@@ -20,8 +20,10 @@ module.exports = class Paginator {
 			options.chunkSize = 5;
 		if (typeof options.defaultPage !== "number" || !(options.defaultPage >= 0 && options.defaultPage <= fields.length))
 			options.defaultPage = 1;
+		if (!options.preChunked || !Array.isArray(fields) || !fields.every(field => Array.isArray(field)))
+			this.fields = chunk(this.fields, options.chunkSize);
+		this.infinite = !!options.infinite;
 		this.current = options.defaultPage - 1;
-		this.fields = Paginator.chunk(this.fields, options.chunkSize);
 		this.total = this.fields.length;
 		this.embedTemplate = ["object", "function"].includes(typeof options.embedTemplate) ? options.embedTemplate : {};
 	}
@@ -61,14 +63,18 @@ module.exports = class Paginator {
 				await reaction.fetch().catch(() => { });
 			switch (reaction.emoji.toString()) {
 				case this.back: {
-					this.current--;
-					if (this.current < 0) this.current = this.total - 1;
+					if (this.infinite && (this.current < 0))
+						this.current = this.total - 1;
+					else if (this.current > 0)
+						this.current--;
 					reaction.users.remove(this.user).catch(() => { });
 					break;
 				}
 				case this.next: {
-					this.current++;
-					if (this.current > this.total - 1) this.current = 0;
+					if (this.infinite && (this.current > this.total - 1))
+						this.current = 0;
+					else if (this.current < this.total)
+						this.current++;
 					reaction.users.remove(this.user).catch(() => { });
 					break;
 				}
