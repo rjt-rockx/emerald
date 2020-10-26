@@ -6,7 +6,7 @@ module.exports = class Help extends BaseCommand {
 	constructor(client) {
 		super(client, {
 			name: "help",
-			group: "utils",
+			group: "bot",
 			description: "Get help for a specific command or for all commands.",
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
 			aliases: ["h"],

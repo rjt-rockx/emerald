@@ -7,7 +7,7 @@ module.exports = class Eval extends BaseCommand {
 	constructor(client) {
 		super(client, {
 			name: "eval",
-			group: "utils",
+			group: "bot",
 			description: "Executes JavaScript code.",
 			ownerOnly: true,
 			args: [
