@@ -10,7 +10,7 @@ module.exports = class Paginator {
 		this.channel = channel;
 		this.fields = fields;
 		if (!options) options = {};
-		this.timeout = options.timeout && Number.isSafeInteger(options.timeout) && options.timeout <= 300 && options.timeout > 0 ? options.timeout : 15;
+		this.timeout = options.timeout && Number.isSafeInteger(options.timeout) && options.timeout <= 300 && options.timeout > 0 ? options.timeout : 30;
 		if (options.numberFields)
 			this.fields = this.fields.map((field, index) => ({ ...field, name: `${index + 1}. ${field.name}` }));
 		if (options.splitLongFields)
