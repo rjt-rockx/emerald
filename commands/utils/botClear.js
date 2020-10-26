@@ -5,7 +5,7 @@ module.exports = class BotClear extends BaseCommand {
 		super(client, {
 			name: "botclear",
 			aliases: ["bc"],
-			group: "misc",
+			group: "utils",
 			description: "Clear bot messages as well as messages starting with specific prefixes.",
 			args: [
 				{

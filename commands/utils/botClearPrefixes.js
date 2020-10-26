@@ -5,7 +5,7 @@ module.exports = class BotClear extends BaseCommand {
 		super(client, {
 			name: "botclearprefixes",
 			aliases: ["botclearprefix", "bcprefixes", "bcprefix"],
-			group: "misc",
+			group: "utils",
 			description: "Add, remove or list the prefixes configured for botclear.",
 			args: [
 				{

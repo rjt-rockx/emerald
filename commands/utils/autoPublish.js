@@ -5,7 +5,7 @@ module.exports = class AutoPublish extends BaseCommand {
 		super(client, {
 			name: "autopublish",
 			description: "Automatically publish messages sent in a particular channel.",
-			group: "misc",
+			group: "utils",
 			userPermissions: ["MANAGE_GUILD", "MANAGE_CHANNELS"],
 			clientPermissions: ["VIEW_CHANNEL", "SEND_MESSAGES", "EMBED_LINKS"],
 			args: [

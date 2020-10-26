@@ -13,7 +13,7 @@ module.exports = class ReactChannel extends BaseCommand {
 		super(client, {
 			name: "reactchannel",
 			description: "Add or remove a react channel. Messages containing a link or embed will be reacted with a vote emoji in this channel.",
-			group: "misc",
+			group: "utils",
 			memberName: "reactchannel",
 			userPermissions: ["ADMINISTRATOR"],
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],

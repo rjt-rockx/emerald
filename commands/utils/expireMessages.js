@@ -7,7 +7,7 @@ module.exports = class ExpireMessages extends BaseCommand {
 		super(client, {
 			name: "expiremessages",
 			description: "Delete messages in a particular channel after a certain duration.",
-			group: "misc",
+			group: "utils",
 			userPermissions: ["MANAGE_GUILD", "MANAGE_CHANNELS", "MANAGE_MESSAGES"],
 			clientPermissions: ["VIEW_CHANNEL", "SEND_MESSAGES", "EMBED_LINKS", "MANAGE_MESSAGES"],
 			args: [
