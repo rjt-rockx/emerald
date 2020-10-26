@@ -1,5 +1,6 @@
 const { MessageEmbed } = require("discord.js");
 const { Util: { splitMessage, resolveString } } = require("discord.js");
+const { chunk } = require("./utilities.js");
 
 module.exports = class Paginator {
 	constructor({ channel, user }, fields, options) {
@@ -23,10 +24,6 @@ module.exports = class Paginator {
 		this.fields = Paginator.chunk(this.fields, options.chunkSize);
 		this.total = this.fields.length;
 		this.embedTemplate = ["object", "function"].includes(typeof options.embedTemplate) ? options.embedTemplate : {};
-	}
-
-	static chunk(arrayLike, size) {
-		return arrayLike.length === 0 ? [] : [arrayLike.slice(0, size)].concat(this.chunk(arrayLike.slice(size), size));
 	}
 
 	async getEmbedTemplate() {
