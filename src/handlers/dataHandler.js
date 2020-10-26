@@ -20,10 +20,7 @@ class DataHandler {
 
 			if (guildStorage.has("commandPrefix"))
 				guild.commandPrefix = guildStorage.get("commandPrefix");
-			else {
-				guild.commandPrefix = this.client.commandPrefix;
-				guildStorage.set("commandPrefix", guild.commandPrefix);
-			}
+			else guild.commandPrefix = null;
 		}
 	}
 
