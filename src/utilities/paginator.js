@@ -1,8 +1,6 @@
 const { MessageEmbed } = require("discord.js");
 const { Util: { splitMessage, resolveString } } = require("discord.js");
 
-const chunk = (arrayLike, size) => arrayLike.length === 0 ? [] : [arrayLike.slice(0, size)].concat(chunk(arrayLike.slice(size), size));
-
 module.exports = class Paginator {
 	constructor({ channel, user }, fields, options) {
 		this.back = "◀";
@@ -22,16 +20,31 @@ module.exports = class Paginator {
 		if (typeof options.defaultPage !== "number" || !(options.defaultPage >= 0 && options.defaultPage <= fields.length))
 			options.defaultPage = 1;
 		this.current = options.defaultPage - 1;
-		this.fields = chunk(this.fields, options.chunkSize);
+		this.fields = Paginator.chunk(this.fields, options.chunkSize);
 		this.total = this.fields.length;
-		this.embedTemplate = typeof options.embedTemplate === "object" ? options.embedTemplate : {};
+		this.embedTemplate = ["object", "function"].includes(typeof options.embedTemplate) ? options.embedTemplate : {};
+	}
+
+	static chunk(arrayLike, size) {
+		return arrayLike.length === 0 ? [] : [arrayLike.slice(0, size)].concat(this.chunk(arrayLike.slice(size), size));
+	}
+
+	async getEmbedTemplate() {
+		if (typeof this.embedTemplate === "object")
+			return this.embedTemplate;
+		if (typeof this.embedTemplate === "function")
+			return this.embedTemplate({
+				fields: this.fields[this.current],
+				current: this.current + 1,
+				total: this.total
+			});
 	}
 
 	async initialize() {
 		this.message = await this.channel.send(new MessageEmbed({
-			...this.embedTemplate,
 			fields: this.fields[this.current],
-			footer: this.footer
+			footer: this.footer,
+			...(await this.getEmbedTemplate())
 		}));
 		if (this.message.partial)
 			await this.message.fetch().catch(() => { });
@@ -137,7 +150,11 @@ module.exports = class Paginator {
 	}
 
 	async refresh() {
-		await this.message.edit(new MessageEmbed({ ...this.embedTemplate, fields: this.fields[this.current], footer: this.footer }));
+		await this.message.edit(new MessageEmbed({
+			fields: this.fields[this.current],
+			footer: this.footer,
+			...(await this.getEmbedTemplate())
+		}));
 		this.collector.resetTimer({ idle: this.timeout * 1000 });
 		return this;
 	}
