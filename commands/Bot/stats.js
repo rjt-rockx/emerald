@@ -42,7 +42,7 @@ module.exports = class Stats extends BaseCommand {
 				}] : []),
 				{
 					name: "Memory / Uptime",
-					value: Math.floor(process.memoryUsage().heapUsed / 1024 / 1024) + "MB /" + getDuration(ctx.client.uptime),
+					value: Math.floor(process.memoryUsage().heapUsed / 1024 / 1024) + "MB / " + getDuration(ctx.client.uptime),
 					inline: true
 				},
 				{
