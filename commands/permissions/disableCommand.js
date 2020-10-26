@@ -1,25 +1,25 @@
 const BaseCommand = require("../../src/base/baseCommand.js");
 const { Guild, Role, User, TextChannel, CategoryChannel, VoiceChannel } = require("discord.js");
 
-module.exports = class Enable extends BaseCommand {
+module.exports = class Disable extends BaseCommand {
 	constructor(client) {
 		super(client, {
-			name: "enable",
+			name: "disablecommand",
 			group: "permissions",
-			aliases: ["enablecmd", "enablecommand"],
-			description: "Enable a bot command.",
+			aliases: ["disablecmd", "dcmd"],
+			description: "Disable a bot command.",
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
 			userPermissions: ["MANAGE_GUILD"],
 			guarded: true,
 			args: [
 				{
 					key: "command",
-					prompt: "Command to enable",
+					prompt: "Command to disable",
 					type: "command"
 				},
 				{
 					key: "target",
-					prompt: "Target to enable the command for",
+					prompt: "Target to disable the command for",
 					type: "contextual|guild|role|user|text-channel|category-channel|voice-channel"
 				}
 			]
@@ -32,7 +32,7 @@ module.exports = class Enable extends BaseCommand {
 
 	async task(ctx) {
 		const commandPermissions = ctx.guildStorage.get("commandPermissions");
-		const newPerms = { id: ctx.args.target.id, enabled: true };
+		const newPerms = { id: ctx.args.target.id, enabled: false };
 		if (ctx.args.target instanceof Guild)
 			newPerms.type = "guild";
 		else if (ctx.args.target instanceof Role)
@@ -45,7 +45,7 @@ module.exports = class Enable extends BaseCommand {
 			newPerms.type = "category-channel";
 		else if (ctx.args.target instanceof VoiceChannel)
 			newPerms.type = "voice-channel";
-		else return ctx.args.embed({ description: "Invalid permission specified." });
+		else return ctx.embed({ description: "Invalid permission specified." });
 		let permNo = 1;
 		if (!commandPermissions.length || !commandPermissions.some(permEntry => permEntry.command && permEntry.command === ctx.args.command.name)) {
 			commandPermissions.push({ command: ctx.args.command.name, permissions: [newPerms] });
@@ -58,8 +58,8 @@ module.exports = class Enable extends BaseCommand {
 			return permEntry;
 		}));
 		return ctx.embed({
-			title: `Command permission added for ${ctx.args.command.name}`,
-			description: `\`${permNo}.\` ${this.getReadablePermission(ctx, newPerms)}`
+			title: `Command permissions for ${ctx.args.command.name} updated.`,
+			fields: [{ name: "New permission", value: `\`${permNo}.\` ${this.getReadablePermission(ctx, newPerms)}` }]
 		});
 	}
 };
