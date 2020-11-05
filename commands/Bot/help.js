@@ -33,7 +33,10 @@ module.exports = class Help extends BaseCommand {
 				embedTemplate: ({ current, total }) => {
 					return {
 						title: `${toTitleCase(allCommandPages[current - 1].group.name)} commands`,
-						description: `Type \`${prefix}help\` followed by the command name to see detailed help for that command.`,
+						description: [
+							`Type \`${prefix}help\` followed by the command name to see detailed help for that command.`,
+							`For info about the bot, type \`${prefix}stats\``
+						].join("\n"),
 						footer: {
 							text: [
 								`Group ${groupIDs.findIndex(id => id === allCommandPages[current - 1].group.id) + 1} of ${groupIDs.length}`,
