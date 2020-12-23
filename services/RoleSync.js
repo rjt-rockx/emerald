@@ -29,6 +29,8 @@ module.exports = class RoleSync extends BaseService {
 				if (!guild.me || !guild.me.hasPermission("MANAGE_ROLES"))
 					continue;
 				const [roleID] = Object.entries(syncedRoles).find(([_, userID]) => userID === ctx.newUser.id);
+				if (!guild.roles.cache.has(roleID))
+					continue;
 				const role = guild.roles.cache.get(roleID);
 				if (!role.editable)
 					continue;
