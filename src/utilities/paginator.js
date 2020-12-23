@@ -56,7 +56,9 @@ module.exports = class Paginator {
 		if (this.total > 2)
 			await this.message.react(this.stop);
 		this.collector = this.message.createReactionCollector((reaction, user) =>
-			reaction.me && user.id === this.user.id && user.id !== this.message.author.id, { time: this.timeout * 1000 });
+			user.id === this.user.id
+			&& reaction.users.cache.has(this.message.client.user.id)
+			&& user.id !== this.message.author.id, { time: this.timeout * 1000 });
 
 		const paginate = async reaction => {
 			if (reaction.partial)
@@ -81,6 +83,9 @@ module.exports = class Paginator {
 				case this.stop: {
 					this.collector.stop();
 					break;
+				}
+				default: {
+					return;
 				}
 			}
 			return this.refresh();

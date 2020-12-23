@@ -22,7 +22,7 @@ module.exports = class Eval extends BaseCommand {
 		this.lastResult = null;
 		this.timeoutFlag = true;
 		this.newTimeout = (seconds = 120) => this.timeoutFlag = true && setTimeout(async () => {
-			const existingReaction = this.lastEval.reactions.cache.find(reaction => reaction.me);
+			const existingReaction = this.lastEval.reactions.cache.find(reaction => reaction.users.cache.has(client.user.id));
 			if (existingReaction)
 				existingReaction.remove().catch(() => { });
 			this.timeoutFlag = false;
@@ -36,11 +36,11 @@ module.exports = class Eval extends BaseCommand {
 		if (ctx.msg.content.includes("token") || ctx.msg.content.includes("config"))
 			return ctx.embed({ description: "Accessing token/config is not allowed." });
 		this.reactionsEnabled = ctx.channel.permissionsFor(ctx.client.user).has("ADD_REACTIONS");
-		const existingReaction = ctx.message.reactions.cache.find(reaction => reaction.me);
+		const existingReaction = ctx.message.reactions.cache.find(reaction => reaction.users.cache.has(ctx.client.user.id));
 		if (existingReaction)
 			existingReaction.remove().catch(() => { });
 		if (this.lastEval && this.lastEval.id !== ctx.message.id) {
-			const oldReaction = this.lastEval.reactions.cache.find(reaction => reaction.me);
+			const oldReaction = this.lastEval.reactions.cache.find(reaction => reaction.users.cache.has(ctx.client.user.id));
 			if (oldReaction)
 				oldReaction.remove().catch(() => { });
 			this.reusableMessage = null;
