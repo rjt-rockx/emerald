@@ -1,5 +1,6 @@
 const config = require("./config.js");
 const { CommandoClient } = require("discord.js-commando");
+const { Intents } = require("discord.js");
 const structureHandler = require("./src/handlers/structureHandler.js");
 const serviceHandler = require("./src/handlers/serviceHandler.js");
 const commandHandler = require("./src/handlers/commandHandler.js");
@@ -14,7 +15,8 @@ const client = new CommandoClient({
 	commandPrefix: config.defaultPrefix,
 	nonCommandEditable: false,
 	commandEditableDuration: 0,
-	partials: ["CHANNEL", "MESSAGE", "REACTION"]
+	partials: ["CHANNEL", "MESSAGE", "REACTION"], 
+	ws: { intents: Intents.ALL }
 });
 
 client.once("ready", async () => {
