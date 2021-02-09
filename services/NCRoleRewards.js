@@ -37,11 +37,13 @@ module.exports = class NCRoleRewards extends BaseService {
 				catch (err) { continue; }
 			}
 			else member = ctx.guild.members.cache.get(lbUser.userId);
-			if (!member || !(member instanceof GuildMember))
+			if (!member || !(member instanceof GuildMember) || !member.roles)
 				continue;
 
 			const rolesToAssign = this.rolesToAssign(roleRewards, lbUser.level, ctx.guildStorage.get("ncstackxprolerews"));
 			for (const [roleId, shouldHave] of Object.entries(rolesToAssign)) {
+				if (!ctx.guild.roles.cache.has(roleId))
+					continue;
 				if (!member.roles.cache.has(roleId) && shouldHave)
 					await member.roles.add(roleId);
 				else if (member.roles.cache.has(roleId) && !shouldHave)
