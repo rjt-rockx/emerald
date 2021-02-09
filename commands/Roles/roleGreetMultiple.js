@@ -1,27 +1,26 @@
 const BaseCommand = require("../../src/base/baseCommand.js");
 
-module.exports = class RoleGreetAutoDelete extends BaseCommand {
+module.exports = class RoleGreetMultiple extends BaseCommand {
 	constructor(client) {
 		super(client, {
-			name: "rolegreetautodelete",
-			aliases: ["rgad"],
+			name: "rolegreetmultiple",
+			aliases: ["rgm"],
 			group: "roles",
-			description: "Automatically delete a particular role's greeting message",
+			description: "Combine multiple greeting messages of the same role together",
 			clientPermissions: ["SEND_MESSAGES", "EMBED_LINKS", "MANAGE_ROLES"],
 			userPermissions: ["MANAGE_ROLES", "MANAGE_GUILD"],
 			guildOnly: true,
 			args: [
 				{
 					key: "role",
-					prompt: "Role whose greeting is to be edited",
+					prompt: "Role whose greeting is to be combined",
 					type: "role"
 				},
 				{
-					key: "seconds",
-					prompt: "Seconds after which the message is to be deleted",
-					type: "integer",
-					default: 0,
-					validate: value => value >= 0 && value <= 300
+					key: "enabled",
+					prompt: "Whether to combine multiple greetings of the same role",
+					type: "boolean",
+					default: true
 				}
 			]
 		});
@@ -33,13 +32,13 @@ module.exports = class RoleGreetAutoDelete extends BaseCommand {
 			return ctx.embed("No role greetings found.");
 		if (!Object.keys(roleGreetings).includes(ctx.args.role.id))
 			return ctx.embed("Role greeting not set.");
-		if (ctx.args.seconds === 0) {
-			delete roleGreetings[ctx.args.role.id].timeout;
+		if (!ctx.args.enabled) {
+			delete roleGreetings[ctx.args.role.id].multiple;
 			ctx.guildStorage.set("roleGreetings", roleGreetings);
-			return ctx.embed("Role greeting timeout successfully removed.");
+			return ctx.embed("Role greetings will now send individual messages for each user.");
 		}
-		roleGreetings[ctx.args.role.id].timeout = ctx.args.seconds;
+		roleGreetings[ctx.args.role.id].multiple = ctx.args.enabled;
 		ctx.guildStorage.set("roleGreetings", roleGreetings);
-		return ctx.embed(`Role greeting timeout successfully set to ${ctx.args.seconds}s.`);
+		return ctx.embed("Role greetings will be combined for multiple users being given the same role.");
 	}
 };

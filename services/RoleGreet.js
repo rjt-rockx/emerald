@@ -1,4 +1,5 @@
 const BaseService = require("../src/base/baseService.js");
+const { sleep, grammarCombine } = require("../src/utilities/utilities.js");
 
 module.exports = class RoleGreet extends BaseService {
 	constructor(client) {
@@ -9,6 +10,7 @@ module.exports = class RoleGreet extends BaseService {
 			guildOnly: true,
 			fetchPartials: true
 		});
+		this.greetings = {};
 	}
 
 	getOrdinal(num) {
@@ -22,7 +24,7 @@ module.exports = class RoleGreet extends BaseService {
 		return "th";
 	}
 
-	replacePlaceholders(ctx, role, { channel, message }) {
+	replacePlaceholders(ctx, role, { channel, message }, users) {
 		let replacedMessage = message;
 		const toReplace = [
 			["%servername%", ctx.guild.name],
@@ -32,9 +34,9 @@ module.exports = class RoleGreet extends BaseService {
 			["%channelname%", channel.name],
 			["%channelmention%", channel.toString()],
 			["%channelid%", channel.id],
-			["%username%", ctx.user.name],
-			["%usertag%", ctx.user.tag],
-			["%usermention%", ctx.user.toString()],
+			["%username%", grammarCombine(users.map(user => user.name))],
+			["%usertag%", grammarCombine(users.map(user => user.tag))],
+			["%usermention%", grammarCombine(users.map(user => user.toString()))],
 			["%rolename%", role.name],
 			["%roleid%", role.id],
 			["%rolemention%", role.toString()],
@@ -47,19 +49,37 @@ module.exports = class RoleGreet extends BaseService {
 	}
 
 	async sendGreeting(ctx, role, greeting) {
-		const replacedMessage = this.replacePlaceholders(ctx, role, greeting);
+		let users = [ctx.user];
 		let message;
+		const newUsers = [...this.greetings[role.id].users, ctx.user];
+		if (this.greetings[role.id] && newUsers.length <= 10) {
+			users = newUsers;
+			message = this.greetings[role.id].message;
+			clearTimeout(this.greetings[role.id].timeout);
+		}
+		let messageContent = this.replacePlaceholders(ctx, role, greeting, users);
 		if (greeting.embed) {
 			const embedProperties = {};
 			if (greeting.color)
 				embedProperties.color = greeting.color;
 			if (greeting.image)
 				embedProperties.image = { url: greeting.image };
-			message = greeting.channel.send({ embed: { description: replacedMessage, ...embedProperties } });
+			messageContent = { embed: { description: messageContent, ...embedProperties } };
 		}
-		else message = greeting.channel.send(replacedMessage);
-		if (greeting.timeout)
-			return message.then(m => m.delete({ timeout: +greeting.timeout * 1000 }));
+		message = message ? message.then(m => m.edit(messageContent)) : greeting.channel.send(messageContent);
+		if (greeting.timeout && !greeting.multiple)
+			return message.then(m => sleep(+greeting.timeout * 1000).then(() => m.delete()));
+		if (greeting.multiple) {
+			this.greetings[role.id] = { message, users };
+			if (greeting.timeout)
+				this.greetings[role.id].timeout = setTimeout(() =>
+					this.greetings[role.id].message
+						.then(m => {
+							delete this.greetings[role.id];
+							return m;
+						})
+						.then(m => m.delete()), +greeting.timeout * 1000);
+		}
 		return message;
 	}
 
