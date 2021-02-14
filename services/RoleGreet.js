@@ -51,9 +51,8 @@ module.exports = class RoleGreet extends BaseService {
 	async sendGreeting(ctx, role, greeting) {
 		let users = [ctx.user];
 		let message;
-		const newUsers = [...this.greetings[role.id].users, ctx.user];
-		if (this.greetings[role.id] && newUsers.length <= 10) {
-			users = newUsers;
+		if (this.greetings[role.id] && Array.isArray(this.greetings[role.id].users) && this.greetings[role.id].users.length < 10) {
+			users = [...this.greetings[role.id].users, ctx.user];
 			message = this.greetings[role.id].message;
 			clearTimeout(this.greetings[role.id].timeout);
 		}
