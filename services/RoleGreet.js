@@ -52,7 +52,8 @@ module.exports = class RoleGreet extends BaseService {
 		let users = [ctx.user];
 		let message;
 		if (this.greetings[role.id] && Array.isArray(this.greetings[role.id].users) && this.greetings[role.id].users.length < 10) {
-			users = [...this.greetings[role.id].users, ctx.user];
+			users = [...this.greetings[role.id].users, ctx.user]
+				.filter((user, _, users) => users.map(u => u.id).indexOf(user.id) === users.map(u => u.id).lastIndexOf(user.id));
 			message = this.greetings[role.id].message;
 			clearTimeout(this.greetings[role.id].timeout);
 		}
