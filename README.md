@@ -1,11 +1,13 @@
 # Emerald
+
 A simple Discord bot built with Discord.js and Commando.
 
 ---
 
-### Disclaimer: I have no idea what the fuck I'm doing with this bot. 
+## Disclaimer: I have no idea what the fuck I'm doing with this bot
 
-Now that that's out of the way, here's some of the things this bot has so far: 
+Now that that's out of the way, here's some of the things this bot has so far:
+
 - Couple of handy commands for specific use cases like avatar-role color syncing, message expiry and role greetings
 - Decent XP system that I don't even use anywhere because why not
 - Overengineered context system used everywhere (`ctx.` all the things)
