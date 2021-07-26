@@ -54,7 +54,7 @@ module.exports = class Eval extends BaseCommand {
 		} catch (err) {
 			if (this.reactionsEnabled && !this.silent) ctx.message.react("❌").catch(() => { });
 			this.existingTimeout = this.newTimeout();
-			const result = Discord.splitMessage([
+			const result = Discord.Util.splitMessage([
 				"```",
 				err.stack || err,
 				"```"
@@ -71,7 +71,7 @@ module.exports = class Eval extends BaseCommand {
 					const updatedResult = this.makeResultMessages(resolvedValue, ctx.args.script, ctx);
 					this.sendResult(ctx, updatedResult);
 				}).catch(err => {
-					const updatedResult = Discord.splitMessage([
+					const updatedResult = Discord.Util.splitMessage([
 						"```",
 						"Error while evaluating",
 						err.stack || err,
@@ -87,7 +87,7 @@ module.exports = class Eval extends BaseCommand {
 		if (val instanceof Error) {
 			if (this.reactionsEnabled && !this.silent) this.currentContext.message.react("❌").catch(() => { });
 			this.existingTimeout = this.newTimeout();
-			const result = Discord.splitMessage([
+			const result = Discord.Util.splitMessage([
 				"```",
 				"Error while evaluating",
 				val.stack || val,
@@ -105,7 +105,7 @@ module.exports = class Eval extends BaseCommand {
 						const updatedResult = this.makeResultMessages(resolvedValue, null, this.currentContext);
 						this.sendResult(this.currentContext, updatedResult);
 					}).catch(err => {
-						const updatedResult = Discord.splitMessage([
+						const updatedResult = Discord.Util.splitMessage([
 							"```",
 							"Error while evaluating",
 							err.stack || err,
@@ -129,13 +129,13 @@ module.exports = class Eval extends BaseCommand {
 		const prepend = `\`\`\`js\n${prependPart}\n`;
 		const append = `\n${appendPart}\n\`\`\``;
 		if (input) {
-			return Discord.splitMessage([
+			return Discord.Util.splitMessage([
 				"```js",
 				inspected,
 				"```"
 			].join("\n"), { maxLength: 1900, prepend, append });
 		} else {
-			return Discord.splitMessage([
+			return Discord.Util.splitMessage([
 				"```js",
 				inspected,
 				"```"
