@@ -2,6 +2,13 @@
 
 A simple Discord bot built with Discord.js and Commando.
 
+## Note
+
+This is no longer actively maintained, and may stop working at any point in time. I make no guarantees when it comes to uptime. <br/>
+If you're looking for Discord bot frameworks similar to Commando, check out [slash-create](https://slash-create.js.org/). <br/>
+For future projects, use Typescript with Prisma on SQLite for a much better development experience. <br/>
+Make sure to lint your code with ESLint and clean it up with Prettier for better readability too. <br/>
+
 ---
 
 ## Disclaimer: I have no idea what the fuck I'm doing with this bot
