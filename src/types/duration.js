@@ -1,5 +1,5 @@
-const parseDuration = require("parse-duration");
 const { ArgumentType } = require("discord.js-commando");
+const parseDuration = require("../utilities/parseDuration.js");
 
 class DurationArgumentType extends ArgumentType {
 	constructor(client) {
