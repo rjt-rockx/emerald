@@ -2,12 +2,16 @@
 
 A simple Discord bot built with Discord.js and Commando.
 
-## Note
+## Maintenance status
 
-This is no longer actively maintained, and may stop working at any point in time. I make no guarantees when it comes to uptime. <br/>
+Emerald receives maintenance and security fixes, but is not under active feature development. It currently retains its Discord.js 12 and Commando architecture; a future Discord.js 14 migration will require replacing Commando and is intentionally outside routine maintenance. I make no guarantees when it comes to uptime. <br/>
 If you're looking for Discord bot frameworks similar to Commando, check out [slash-create](https://slash-create.js.org/). <br/>
 For future projects, use Typescript with Prisma on SQLite for a much better development experience. <br/>
 Make sure to lint your code with ESLint and clean it up with Prettier for better readability too. <br/>
+
+Use Node.js 22. Install with `npm ci`, then run `npm run lint` and `npm test` before deployment.
+
+Emerald requests only the Gateway intents used by its current features. See the [privileged intents review](docs/privileged-intents-review.md) for the audit, Discord submission text and deployment checklist.
 
 ---
 
